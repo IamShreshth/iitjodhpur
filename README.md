@@ -35,19 +35,8 @@ We highly encourage contributions! If you have coursework resources, assignments
 
 ### ⚠️ Crucial Folder Naming Rule
 * **Folder Name = Course Code**: Any new folder created under a semester directory **MUST** be named exactly after its official course code (e.g., `CSL1010`, `MAL1020`, `PHL1010`).
+* Also Add the prof Name
 * Do **NOT** use descriptive names for course folders (e.g., do not name a folder `Linear Algebra` or `Mathematics II`). Use the official course code.
-
-### 📄 File Naming Conventions
-To keep the archive clean and easily searchable, please follow these naming conventions:
-
-* **Exam Papers**: `<Course_Code>_<Exam_Type>_<Year>.<ext>`
-  * *Example*: `MAL1020_Midsem_2026.pdf`
-  * *Example*: `CSL1010_Quiz1_2025.jpg`
-* **Tutorials / Assignments**: `<Course_Code>_<Type>_<Number>.<ext>`
-  * *Example*: `PHL1010_Tutorial_03.pdf`
-  * *Example*: `MEL1010_Assignment_02.pdf`
-* **Lecture Notes / Slides**: `<Course_Code>_Lecture_<Number_or_Topic>.<ext>`
-  * *Example*: `BBL1020_Lecture_12_Bioenergetics.pdf`
 
 ---
 

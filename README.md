@@ -15,7 +15,7 @@ The repository is organized hierarchically by **Batch**, then by **Semester**, a
 iitjodhpur/
 ├── B25/                                    # Batch (e.g., B25 for Batch of 2025)
 │   ├── Sem-1/                              # Semester (Sem-1, Sem-2, etc.)
-│   │   ├── BBL1020/                        # Folder name MUST be the Course Code
+│   │   ├── CSL1010/                        # Folder name MUST be the Course Code
 │   │   │   ├── Lecture Notes/
 │   │   │   ├── Tutorials/
 │   │   │   └── ...

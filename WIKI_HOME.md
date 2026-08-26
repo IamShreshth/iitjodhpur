@@ -1,18 +1,26 @@
 # 📚 IIT Jodhpur B.Tech Wiki & Knowledge Base
 
-Welcome to the central academic wiki for **IIT Jodhpur B.Tech (B25 / B24)**! This knowledge base is curated to provide a unified reference for courses, study materials, tutorial problems, reference books, lab guides, and exam preparation tips.
+Welcome to the central academic wiki for **IIT Jodhpur B.Tech (B25)**! This knowledge base is curated to provide a unified reference for courses, study materials, tutorial problems, reference books, lab guides, and exam preparation tips.
+
+---
+
+### 📖 The Story Behind This
+
+When I first stepped into IIT Jodhpur in my first year, I realized how difficult and scattered it was to find past year papers, tutorial solutions, reference books, and lecture materials in one structured place. 
+
+I didn't want my juniors to go through the same frustration or feel disheartened searching for study materials right before quizzes and exams. That is why I started curating and organizing everything into this repository.
+
+I plan to actively maintain and expand this repository throughout my journey till my final year, ensuring that high-quality materials are always readily accessible, and hopefully, this legacy will continue to be carried forward!
 
 ---
 
 ## 🧭 Quick Navigation
 
 - [📖 Course Index (B25)](#-course-index-b25)
-- [📦 Archive (B24)](#-archive-b24)
 - [🎯 Exam & Evaluation Structure](#-exam--evaluation-structure)
 - [💡 Subject-wise Preparation Guide](#-subject-wise-preparation-guide)
 - [💻 Software & Tools Setup](#-software--tools-setup)
-- [🤝 How to Contribute](#-how-to-contribute)
-- [👥 Credits & Acknowledgments](#-credits--acknowledgments)
+- [👤 Maintainer & Credits](#-maintainer--credits)
 
 ---
 
@@ -31,17 +39,6 @@ The repository is organized by subject codes. Below is the complete catalog of f
 | **`MEL1010`** | Engineering Mechanics | Statics, Dynamics, Problem Sheets, Books | Sem 1 / Sem 2 |
 | **`BBL1020`** | Introduction to Biology | Biology for Engineers Slides, Notes | Sem 1 / Sem 2 |
 | **`CS`** | Communication Skills | Presentation Slides, Grammar & Report Writing | Sem 1 / Sem 2 |
-
----
-
-## 📦 Archive (B24)
-
-For additional problem sets, past tutorial sheets, and previous year question styles, refer to the **B24 archive**:
-
-- `B24/MAL1020-B24`: Mathematics II (Multivariable Calculus, ODEs/PDEs)
-- `B24/PHL1010-B24`: Previous batch Physics tutorials & notes
-- `B24/CY-B24`: Previous batch Chemistry question sets
-- `B24/Tut-B24`: Consolidated tutorial problem archive
 
 ---
 
@@ -83,7 +80,7 @@ Total (100 Marks)
 * **Core Focus:** Classical mechanics/oscillations, electromagnetic theory, optics, and introductory quantum mechanics.
 * **Strategy:**
   1. Focus deeply on derivations and the physical interpretation of boundary conditions.
-  2. Solve previous year tutorial problems from both `B25` and `B24` folders.
+  2. Solve all assigned tutorial problems and review lecture slide derivations thoroughly.
 
 ### 4. ⚙️ Engineering Mechanics (`MEL1010`)
 * **Core Focus:** Free Body Diagrams (FBD), equilibrium equations, friction, trusses, virtual work, kinematics and dynamics of particles and rigid bodies.
@@ -128,35 +125,13 @@ sudo apt install -y build-essential git python3 python3-pip gdb
 
 ---
 
-## 🤝 How to Contribute
+## 👤 Maintainer & Credits
 
-To add missing notes, new tutorial solutions, or previous exam papers:
-
-1. **Fork the Repository**: Click the **Fork** button at the top right of the [GitHub Repo](https://github.com/IamShreshth/iitjodhpur).
-2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/<your-username>/iitjodhpur.git
-   ```
-3. **Add your materials** under the appropriate course folder:
-   - Make sure PDFs are well-scanned (use tools like CamScanner / Adobe Scan).
-   - Use clean filenames (e.g., `Tutorial_03_Solutions.pdf`, `Midsem_2025_Paper.pdf`).
-4. **Commit & Push**:
-   ```bash
-   git add .
-   git commit -m "Add: MAL1010 Tutorial 3 solutions"
-   git push origin main
-   ```
-5. **Open a Pull Request (PR)** on GitHub with a brief description.
-
----
-
-## 👥 Credits & Acknowledgments
-
-- **Maintainer:** [Shreshth Dhimole](https://github.com/IamShreshthDhimole)
-- **Contributors & Material Sources:** [Abhishek Reddy](https://github.com/abhishekreddy22) and batchmates across IIT Jodhpur B25 & B24.
+- **Maintained By:** [Shreshth Dhimole](https://github.com/IamShreshthDhimole) only
+- **Also thanks to:** [Abhishek Reddy](https://github.com/abhishekreddy22) for the materials 🙌
 
 ---
 
 <p align="center">
-  <i>Maintained for the IIT Jodhpur Student Community • Good luck with your academics! 🚀</i>
+  <i>Maintained by Shreshth Dhimole • Good luck with your academics! 🚀</i>
 </p>

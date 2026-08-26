@@ -1,4 +1,4 @@
-# 🎓 IIT Jodhpur B25 — The Mega Repo
+# IIT Jodhpur B25 — The Mega Repo
 
 > First year, all in one place — slides, tutorials, lectures, books, papers & more.
 

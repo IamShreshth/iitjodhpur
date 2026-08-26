@@ -1,79 +1,35 @@
-# IIT Jodhpur Academics & Coursework Repository
+# IIT Jodhpur - First Year Coursework
 
-Welcome to the IIT Jodhpur coursework archive. This repository serves as a centralized hub for students to access and share question papers, study materials, lecture slides, assignments, and tutorial sheets for various batches and semesters.
+Study materials, lecture notes, tutorials, and assignments for first year courses at IIT Jodhpur.
 
-> [!IMPORTANT]  
-> The contents of this repository are intended strictly for reference, practice, and academic preparation.
+## Courses
 
----
+| Code | Subject |
+|------|---------|
+| BBL1020 | Introduction to Biology |
+| CSL1010 | Computer Programming |
+| CYL1010 | Chemistry |
+| EEL1010 | Introduction to Electrical Engineering |
+| MAL1010 | Mathematics I |
+| MAL1020 | Mathematics II |
+| MEL1010 | Engineering Mechanics |
+| PHL1010 | Physics |
 
-## 📂 Repository Structure
+## Structure
 
-The repository is organized hierarchically by **Batch**, then by **Semester**, and finally by the official **Course Code**. 
-
-```text
-iitjodhpur/
-├── B25/                                    # Batch (e.g., B25 for Batch of 2025)
-│   ├── Sem-1/                              # Semester (Sem-1, Sem-2, etc.)
-│   │   ├── CSL1010/                        # Folder name MUST be the Course Code
-│   │   │   ├── Lecture Notes/
-│   │   │   ├── Tutorials/
-│   │   │   └── ...
-│   │   ├── CSL1010/
-│   │   └── ...
-│   └── Sem-2/
-│       ├── MAL1020/
-│       ├── PHL1010/
-│       └── ...
+```
+B25/
+├── CourseCode/
+│   ├── Lectures/
+│   ├── Tutorials/
+│   └── ...
 ```
 
----
+## Contributing
 
-## ✍️ Contribution Guidelines
-
-We highly encourage contributions! If you have coursework resources, assignments, tutorial sheets, or exam papers, please contribute to help keep this archive updated.
-
-### ⚠️ Crucial Folder Naming Rule
-* **Folder Name = Course Code**: Any new folder created under a semester directory **MUST** be named exactly after its official course code (e.g., `CSL1010`, `MAL1020`, `PHL1010`).
-* Also Add the prof Name
-* Do **NOT** use descriptive names for course folders (e.g., do not name a folder `Linear Algebra` or `Mathematics II`). Use the official course code.
+1. Fork → Clone → Add files under the correct course code folder → PR
+2. Folder names **must** be the official course code (e.g. `CSL1010`, not `Programming`)
 
 ---
 
-## 🚀 How to Contribute
-
-To contribute your files to this repository, please follow these steps:
-
-1. **Fork the Repository**
-   Click the **Fork** button at the top right of this repository page to create a copy under your GitHub account.
-
-2. **Clone Your Fork**
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/iitjodhpur.git
-   cd iitjodhpur
-   ```
-
-3. **Create a New Branch**
-   ```bash
-   git checkout -b add-coursework-resources
-   ```
-
-4. **Add Your Files**
-   Ensure your files follow the **Folder Naming Rule** (using exact course codes) and file naming conventions. Place them in the appropriate directory.
-
-5. **Commit Your Changes**
-   Write a descriptive commit message:
-   ```bash
-   git add .
-   git commit -m "Add MAL1020 Midsem 2026 paper and Tutorial 3"
-   ```
-
-6. **Push and Pull Request**
-   Push the changes to your fork and submit a Pull Request (PR) to the main repository.
-   ```bash
-   git push origin add-coursework-resources
-   ```
-
----
-
-*Thank you for contributing and helping your peers! If you notice any typos or have suggestions for structure improvements, feel free to open an issue or pull request.*
+*For IIT Jodhpur students — use for reference and practice only.*

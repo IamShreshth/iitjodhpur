@@ -1,6 +1,6 @@
-# IIT Jodhpur - First Year Coursework
+# 🎓 IIT Jodhpur B25 — The Mega Repo
 
-Study materials, lecture notes, tutorials, and assignments for first year courses at IIT Jodhpur.
+> First year, all in one place — slides, tutorials, lectures, books, papers & more.
 
 ## Courses
 
@@ -25,11 +25,59 @@ B25/
 │   └── ...
 ```
 
-## Contributing
+## How to Use
 
-1. Fork → Clone → Add files under the correct course code folder → PR
-2. Folder names **must** be the official course code (e.g. `CSL1010`, not `Programming`)
+Just clone this repo and you're good to go!
+
+### macOS
+
+```bash
+# Install Git (if not already installed)
+xcode-select --install
+
+# Clone the repo
+git clone https://github.com/IamShreshthDhimole/iitjodhpur.git
+
+# Open the folder
+cd iitjodhpur
+open .
+```
+
+### Linux
+
+```bash
+# Install Git (Debian/Ubuntu)
+sudo apt install git
+
+# Install Git (Fedora)
+sudo dnf install git
+
+# Install Git (Arch)
+sudo pacman -S git
+
+# Clone the repo
+git clone https://github.com/IamShreshthDhimole/iitjodhpur.git
+
+# Open the folder
+cd iitjodhpur
+```
+
+### Windows
+
+```powershell
+# Install Git from https://git-scm.com/download/win
+# Then open Git Bash or PowerShell and run:
+
+git clone https://github.com/IamShreshthDhimole/iitjodhpur.git
+
+# Open the folder
+cd iitjodhpur
+explorer .
+```
 
 ---
 
-*For IIT Jodhpur students — use for reference and practice only.*
+Made with ❤️ by 
+**[Shreshth Dhimole](https://github.com/IamShreshthDhimole)** 
+Also thanks to 
+**[Abhishek Reddy](https://github.com/abhishekreddy22)** for the materials 🙌

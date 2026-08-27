@@ -31,13 +31,13 @@ The repository is organized by subject codes. Below is the complete catalog of f
 | Course Code | Course Name | Resources Available | Semester |
 | :--- | :--- | :--- | :--- |
 | **`MAL1010`** | Mathematics I (Calculus & Linear Algebra) | Slides, Tutorials, Important Points, Books | Semester 1 |
-| **`CSL1010`** | Computer Programming | Fall 2025 / Spring 2026 Slides, Problem Sets | Sem 1 / Sem 2 |
-| **`PHL1010`** | Physics for Engineers | Lecture Slides, Tutorials, Reference Texts | Sem 1 / Sem 2 |
+| **`CSL1010`** | Introduction to Computer Science | Fall 2025 / Spring 2026 Slides, Problem Sets | Sem 1 / Sem 2 |
+| **`PHL1010`** | Electromagnetics and Optics | Lecture Slides, Tutorials, Reference Texts | Sem 1 / Sem 2 |
 | **`CYL1010`** | Chemistry | Lecture Notes, Slides, Practice Problems | Sem 1 / Sem 2 |
 | **`CY-LaB`** | Chemistry Laboratory | Lab Manuals, Guidelines, Observation Formats | Sem 1 / Sem 2 |
 | **`EEL1010`** | Introduction to Electrical Engineering | Circuit Theory, Notes, Problem Sets | Sem 1 / Sem 2 |
 | **`MEL1010`** | Engineering Mechanics | Statics, Dynamics, Problem Sheets, Books | Sem 1 / Sem 2 |
-| **`BBL1020`** | Introduction to Biology | Biology for Engineers Slides, Notes | Sem 1 / Sem 2 |
+| **`BBL1020`** | Intro to Bioengineering | Biology for Engineers Slides, Notes | Sem 1 / Sem 2 |
 | **`CS`** | Communication Skills | Presentation Slides, Grammar & Report Writing | Sem 1 / Sem 2 |
 
 ---

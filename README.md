@@ -6,14 +6,14 @@
 
 | Code | Subject |
 |------|---------|
-| BBL1020 | Introduction to Biology |
-| CSL1010 | Computer Programming |
+| BBL1020 | Intro to Bioengineering |
+| CSL1010 | Introduction to Computer Science |
 | CYL1010 | Chemistry |
 | EEL1010 | Introduction to Electrical Engineering |
 | MAL1010 | Mathematics I |
 | MAL1020 | Mathematics II |
 | MEL1010 | Engineering Mechanics |
-| PHL1010 | Physics |
+| PHL1010 | Electromagnetics and Optics |
 
 ## Structure
 

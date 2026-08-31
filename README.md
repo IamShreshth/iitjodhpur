@@ -36,7 +36,7 @@ Just clone this repo and you're good to go!
 xcode-select --install
 
 # Clone the repo
-git clone https://github.com/IamShreshthDhimole/iitjodhpur.git
+git clone https://github.com/IamShreshth/iitjodhpur.git
 
 # Open the folder
 cd iitjodhpur
@@ -56,7 +56,7 @@ sudo dnf install git
 sudo pacman -S git
 
 # Clone the repo
-git clone https://github.com/IamShreshthDhimole/iitjodhpur.git
+git clone https://github.com/IamShreshth/iitjodhpur.git
 
 # Open the folder
 cd iitjodhpur
@@ -68,7 +68,7 @@ cd iitjodhpur
 # Install Git from https://git-scm.com/download/win
 # Then open Git Bash or PowerShell and run:
 
-git clone https://github.com/IamShreshthDhimole/iitjodhpur.git
+git clone https://github.com/IamShreshth/iitjodhpur.git
 
 # Open the folder
 cd iitjodhpur
@@ -78,7 +78,7 @@ explorer .
 ---
 
 Made with ❤️ by 
-**[Shreshth Dhimole](https://github.com/IamShreshthDhimole)** 
+**[Shreshth Dhimole](https://github.com/IamShreshth)** 
 Also thanks to 
 **[Abhishek Reddy](https://github.com/abhishekreddy22)** for the materials 🙌
 

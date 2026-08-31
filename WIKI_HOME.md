@@ -128,7 +128,7 @@ sudo apt install -y build-essential git python3 python3-pip gdb
 
 ## 👤 Maintainer & Credits
 
-- **Maintained By:** [Shreshth Dhimole](https://github.com/IamShreshthDhimole) only
+- **Maintained By:** [Shreshth Dhimole](https://github.com/IamShreshth) only
 - **Also thanks to:** [Abhishek Reddy](https://github.com/abhishekreddy22) for the materials 🙌
 
 ---

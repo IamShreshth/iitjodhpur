@@ -83,9 +83,6 @@ Also thanks to
 **[Abhishek Reddy](https://github.com/abhishekreddy22)** for the materials 🙌
 
 <p align="center">
-  <img src="views-graph.svg" alt="Repository Views Graph" width="800"/>
-</p>
-
-<p align="center">
   <a href="https://hits.sh/github.com/IamShreshth/iitjodhpur/"><img alt="Views" src="https://hits.sh/github.com/IamShreshth/iitjodhpur.svg?style=flat&label=Views&extraPrefix=%F0%9F%91%80%20"/></a>
 </p>
+

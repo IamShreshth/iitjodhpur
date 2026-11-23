@@ -1,0 +1,16 @@
+BBL1020 - Intro to Bioengineering
+CSL1010 - Introduction to Computer Science
+CYL1010 - Chemistry
+CY-LaB - Chemistry Laboratory
+EEL1010 - Introduction to Electrical Engineering
+MAL1010 - Mathematics I
+MAL1020 - Mathematics II
+MEL1010 - Engineering Mechanics
+PHL1010 - Electromagnetics and Optics
+CS - Communication Skills
+CSL2010 - Machine Learning
+CSL2020 - Data Structures and Algorithms
+CSL2060 - Software Engineering
+CSL3030 - Operating Systems
+CSL4030 - Data Engineering
+EEL3030 - Communication Systems

@@ -1,0 +1,1327 @@
+
+Make-up Class / Data Engineering - 2026/09/05 10:51 IST - Recording
+
+15:15
+/
+1:04:14
+Transcript
+Search transcript
+0:02
+So um yeah starting the class any questions from last day's discussions
+0:08
+where um we were looking at how if if if this is my uh sector wise fragment if
+0:16
+you see on this side and here what I have is the question
+0:22
+sequence the operation sequence that is something we'll do today but any
+0:27
+questions for the sector wise fragments Is is the element or the difference
+0:32
+between using the natural join and the semi- joint clear
+0:45
+because if if you look down I've included a slide over here which uh says
+0:51
+that if this were a natural join right because you have the same designation ID
+0:57
+uh attribute on both um in both the tables. So then this is what you get.
+1:03
+The first is after a semi- join operation. You see only the relevant
+1:08
+fields are there from the first table. All the fields rather but only one entry
+1:15
+corresponding to a exists. Okay. And for the other table you have all the entries
+1:20
+corresponding to A present. Okay. So now if you have a huge table large number of
+1:26
+rows and a large number of entries per attribute
+1:30
+uh with the same for example employee id or so then the second would lead to a
+1:35
+huge table and given this question you don't need all the differences right if
+1:41
+the question had been where um you would have to identify if he has the same
+1:47
+account or um if he has an account at least in one of the branches where he
+1:53
+has been a manager then you would need all the data
+1:57
+right? If the question had been um has he does he have an account
+2:04
+for any one of the branches
+2:09
+that he has been a manager of. Okay. If this had been the question then you
+2:14
+would have to kind of correlate these fields and then identify if he has ever
+2:20
+had an account. Right. So at this moment since that information
+2:25
+is not needed we can pretty well go forward with the semig. Okay. And now uh
+2:32
+if you look over here I had explicitly done these conversations.
+2:37
+Uh similarly I had done this for designation ID also. The reason is if we
+2:44
+were not to do that. Now if you see I have to include a theta condition over
+2:50
+here. Right? Because these designation ids are separate. So a theta condition
+2:57
+has to be introduced over here which equates these two attributes. Now if I
+3:02
+do a semi join again the same entries come in and in consequential uh the
+3:08
+second attribute is not there. Okay. But for this particular table you see the
+3:13
+DID field has been included because here now you have written the explicit theta
+3:19
+condition which uh correlates between designation ID and DID but uh you do not
+3:26
+have since the names are separate you have to have a separate field. So this
+3:31
+again is a very expensive operation in terms of space. So if you are
+3:36
+transporting a table from one server to the other then you have to be mindful
+3:43
+about the information that you are passing. If it is required then you then
+3:49
+you have as much information as you need or the minimal amount of information
+3:54
+that would be needed in order to get your query solved. Okay. Is it clear
+3:59
+till here? Any questions? Okay. So, uh now if we uh look over
+4:12
+here, I'll just kind of recapitulate. You have the secondary index, primary
+4:17
+index, etc., right? So, I'll just uh maybe draw a little bit to make things
+4:23
+clearer. um
+4:27
+say if I have a secondary index on one on a non-prime attribute then what
+4:35
+happens is if I have a table like this okay if it is a secondary index okay and
+4:44
+say this is on the depth ID department ID so irrespective of how it is stored
+4:50
+in the secondary memory I just have list uh links like this okay which connect
+4:57
+the tpples. So it's a little messy, a little bit more of storage space needed
+5:03
+because you are now you have an additional field of pointers. But then
+5:07
+what happens is it is very easy to extract a chunk of data given the
+5:12
+department ID. Right? So if the department ID is X, then all the
+5:17
+different uh tpples that have the value X for department ID can be extracted as
+5:23
+one chunk. Okay. So this is possible if you have a secondary ID. Had these been
+5:29
+clustered then you would have an explicit set like this where all the X's
+5:35
+come together and then maybe you have the Y. Okay, because this is how it is
+5:40
+arranged in the physical memory. So this is for secondary and this is for
+5:45
+cluster. Okay. So now in the clustered one you
+5:49
+can obviously understand if a new data has to come which has to fit over here
+5:54
+and pertaining to X then you have to shift the data points right then you
+5:59
+have to arrange it uh differently so then that again affects the physical
+6:04
+memory so which is easier in the secondary memory because you just adjust
+6:09
+the links you don't have to um arrange the table so then so this is your
+6:16
+engineering decision your data engineering decision as to what kind of
+6:21
+logical structure or data structure would you be using in order to arrange
+6:25
+your data. Okay. So the logical structure why because you're indexing
+6:30
+upon the data. So whether you go for a secondary index or a clustered or a
+6:36
+primary index is entirely dependent upon all the huristics that you are
+6:42
+considering for your given question. So if this arrangement be needed for the
+6:48
+kind of queries that you anticipate are going to come for your uh use case then
+6:54
+you'll have it that way. Having multiple secondary indexes always helps with
+6:58
+joins as you can very well understand. And a primary index in any case is
+7:04
+maintained so that you can uniquely identify attributes and secondary sorry
+7:10
+clustered and primary indexes are always ordered in some sequence. Okay. So that
+7:15
+you can use additional logic to jump to different fields within uh that
+7:21
+particular range maybe. Okay. You can use hashes etc in order to jump to
+7:26
+different elements. Fine. So till here is it clear?
+7:33
+So if so whenever you get a question like this and no information has been
+7:38
+given on the indexes no information has been given on uh for example what are
+7:45
+the keys etc. So the first thing that you do is identify the keys, identify
+7:51
+the prime attributes and what are you going to consider as the primary key and
+7:56
+then second step would be identifying indexes for your uh entire uh database.
+8:03
+Okay. So whether it be a structured database like an RDBMS or it be a
+8:10
+nonstructured database like a graph etc. indexing, hashing, all of them count.
+8:17
+Okay, irrespective of structured, semistructured or unstructured, this
+8:21
+will always be there because the entire crux of the question over here is to
+8:27
+retrieve data in constant time and to prevent that linear search okay across
+8:33
+all the data points. So if you have a small table which is 10 rows, then
+8:38
+linear search obviously is less expensive. But if you have a huge table
+8:43
+like the big data scenarios that you're dealing with today then having uh such a
+8:48
+solution works. Okay. So now uh going forward so now here I have a thought
+8:55
+question. So so then this fragment has happened um
+9:02
+given all the uh the assumptions that were mentioned in the question.
+9:08
+But now if instead of using designation ID as a key field over here, if I were
+9:14
+to use manager ID of the bank. Okay. So these are two different ways to solve
+9:19
+the problem. So in the first problem, what we're doing is we're looking at the
+9:23
+designation list. We're identifying all the the the particular uh designation ID
+9:30
+that corresponds to manager. We're just transporting that field to
+9:36
+all the other sectors because this is only in the northern sector. So you're
+9:40
+just sending it out to all the other tables and then you were doing your
+9:45
+necessary uh natural join or your semi- join operations. So now here this field
+9:52
+has been renamed because the uh that has been explained before so that you don't
+9:58
+have to use a theta condition and you prevent the scenario of having an extra
+10:03
+field attached to your table. Okay. So you eliminate that scenario if you kind
+10:09
+of rename temporarily. So then over here now the question is
+10:15
+here you're using a natural join versus a semi- join.
+10:19
+Which one would you think is a better option and why?
+10:31
+Mhm. So now what is interesting over here is
+10:42
+if you're using the first uh version of the um employee assignment or join table
+10:50
+if you're using the very first assignment then you will get one kind of
+10:54
+result and if you're using the second uh format then you'll be obviously getting
+10:59
+a different kind because the first one is sector specific
+11:07
+Okay, spec sector specific assignments and this one is sector specific with uh
+11:12
+with respect to only the employee assignment can be anywhere but you are
+11:18
+clubbing them together right so given whichever statement you use you will
+11:23
+possibly over here you might want to go for a semi join if you're not bothered
+11:28
+about which all branches the person has been a manager for a manager of sorry
+11:34
+you if you're not bothered by that detail then a semi- join operation
+11:38
+obviously is a good thing to go for otherwise you'll go for the natural job
+11:44
+and then from there again you'll be equating this with the customer table
+11:49
+because over here you're just getting the employees who have been managers.
+11:54
+So now you need to find out the managers who have been customers. So you perform
+11:59
+the join given the theta condition over here. Obviously field names are
+12:04
+different. Again the same issue whether you want to go for natural join or semi
+12:08
+join and then now whatever data you have. So this operation these two
+12:14
+operations are happening across all the sectors.
+12:18
+So now for the east, south and west uh sectors you evaluate these partial
+12:25
+results and you only do data shipping given the operators shipping that you
+12:33
+did before. Okay. So data shipping as a as an
+12:38
+operation of operator shipping sh uh shipping it isn't that you're shipping
+12:43
+up the entire data. you're not trans uh kind of what shall I say transporting
+12:48
+the entire database. Okay, you're just transporting the results that have come
+12:53
+after operator uh shipping. So now the question over here is instead of using a
+12:59
+designation ID to perform this entire operation, if I had used a manager ID of
+13:06
+the bank, what would have happened? Yes.
+13:33
+Because you see in if you if you look at the database over here here you're only
+13:38
+storing the manager ID of the different branches you may not have the entire
+13:43
+history right so you are possibly only handling
+13:47
+the current managers and if the person has been a manager in
+13:52
+the past and is now say another position higher or god forbid something else. If
+14:00
+they are currently a manager of the other branch, you'll get that data.
+14:04
+Okay. But in the past, if he has been a manager and is now something else, then
+14:09
+you will not be able to uh extract that kind of information if you only use the
+14:16
+manager ID because here you are using only the current data.
+14:22
+Would you agree with that or do you think uh this is incorrect?
+14:41
+Yes. Okay. So, um I shall leave that as a
+15:02
+question for you to think about. Okay. If we were to use only the manager idle,
+15:08
+obviously operations would be easier because you're not transporting this
+15:13
+particular element to any other uh table and you are proceeding with just the
+15:18
+manager ID information which you already have across sectors.
+15:24
+But then would you be losing information?
+15:27
+Are you not processing certain information? That is the question. Okay.
+15:32
+So again that depends on how you have arranged your table.
+15:36
+Okay. So um now the question that comes is if
+15:42
+we were to look at these different queries
+15:47
+any thoughts on how you would like to uh search them?
+15:54
+Any thoughts on that? Is the class here with me or has
+16:06
+everyone vanished? Okay. Another question I have is this
+16:26
+kind of optimization that we are doing over here. Okay, this kind of
+16:31
+optimization. So now you see there are global optimization things that are
+16:35
+happening as well as local optimization. So this fragmentation that you see over
+16:40
+here, this has happened at the global level across all sectors. And this
+16:45
+decision that you are taking whether to use a natural join or a semi- join in
+16:50
+the given sector server this is a local optimization scenario right because you
+16:56
+are just transporting the operators to different sectors and now what you're
+17:02
+going to do with them is a local optimization scenario and if you have
+17:06
+that scope if you have sufficient compute you are able to go forward with
+17:11
+that okay otherwise you have to ship the entire data set that you have. So now
+17:17
+the question over here is this optimization that you see over here is
+17:21
+it static is it dynamic? Is it adaptive? What do you think?
+17:34
+If you consider this as static, why is it static? If you consider this dynamic,
+17:40
+why do you think it is dynamic? because almost uh 90% of the projects that I've
+17:46
+gone through they all have dynamism and adaptivity kind of handled.
+17:53
+So what do you understand by uh dynamis dynism and adaptivity?
+17:59
+Well, what do you understand by these terms that you've written in your
+18:04
+project? And over here, what are we doing?
+18:26
+Is anybody around? I'm so could you repeat like um um which
+18:32
+query we're talking about? I just asked in general what the query that we are
+18:38
+solving now this particular query this strategy that we have is this a
+18:45
+dynamic situation is it adaptive or is it static
+19:05
+If you were to uh kind of have a dynamic approach, what would you do?
+19:12
+If you consider this to be static, if you had to make it adaptive, what
+19:18
+would you do about that? Adaptive and dynamic, you can kind of uh think on the
+19:24
+same lines. See over here when you are Yeah. Yeah.
+19:31
+Go ahead. There is there is a thought.
+19:34
+>> Um so like um are you talking about in terms of like um what tables we have
+19:39
+like precomputed like in that sense?
+19:42
+>> I don't know the optimization strategy the optimization framework that we have
+19:47
+built. this framework that we have thought
+19:55
+about about these are the different sequences
+20:01
+of operations. This is the kind of data I want from all
+20:05
+the tables. See there is a global phase and there is
+20:09
+a local phase. Right? At the global phase, you can take all the decisions
+20:16
+and send it out to all the different servers for just uh what shall I say
+20:23
+just doing the particular operation and sending you back. And another kind of
+20:28
+scenario would be you actually send out the query partial queries obviously
+20:33
+relevant sections of the queries to different tables and allow them to take
+20:37
+decisions. Okay. So if this is static and versus if this were dynamic or
+20:45
+adaptive, how do you think this optimization strategy would be
+20:49
+different? Intuitively, just intuitively, what do
+20:54
+you think would happen with this framework?
+21:06
+Think about from the perspective of where are you taking these optimization
+21:10
+decisions? At what level are you taking them and
+21:15
+are you doing it statically or are you doing it dynamically?
+21:25
+Let me give you an example. Now say if you already know how many tpples exist
+21:32
+across all of these different servers you have a fair amount of idea about the
+21:38
+total number of tpples that exist and when you have clubed them into IND
+21:43
+indexes let's say designation ID or if you have clubed them as per uh say if
+21:49
+codes customer table and you have a fair amount of idea about the number of
+21:54
+tpples that correlate Okay, means given one designation ID,
+22:00
+how many people are there? Or say one IFSC, how many people are there? If you
+22:05
+have an estimate of this, then you can possibly take a very structured static
+22:11
+decision, right? You can do that calculation. See,
+22:14
+when you're doing the optimization, you are calculating that if I just shift the
+22:19
+operator versus if I shift the data, right? you are constantly doing that
+22:25
+kind of optimization if you are not aware of everything. But if you already
+22:31
+have the structured information that given this kind of an uh index I have
+22:36
+these many roughly these many uh fields to cater to. So then you can move
+22:43
+towards a very static structured optimization strategy when you are doing
+22:48
+the calculations that shipping the data versus just shipping the operator doing
+22:54
+the results and bringing it to you. But if you don't have that estimate
+22:59
+right then you have to think about certain other huristics when you are
+23:04
+doing that optimization strategy. You make an estimate of maybe for
+23:10
+example when we had built this particular when when we had engineered
+23:15
+this entire database then you had an estimate of maybe 10,000 customers
+23:22
+which probably after 5 years can grow to 50,000. If you have some kind of an
+23:26
+extraolition formula then that would help you take a better decision.
+23:32
+Right? If you have thought about that now I
+23:36
+have say 20 IFSC's at this given location and after 5 years this will
+23:41
+project to maybe say 30. If you have that kind of extrapolation then then you
+23:47
+can approximate certain dynamism within the work within the optimization
+23:53
+versus if you had known what you already have. Okay. So these runtime decisions
+23:59
+that you have to take runtime you make an extraolation you approximate how much
+24:05
+data I possibly will be having over there and then if you take a data if you
+24:11
+take a decision on your optimization that is where dynamism and adaptivity
+24:17
+come into the picture otherwise it is very structured you already know how
+24:21
+many tpples you're going to deal with and in a very structured global
+24:26
+optimization strategy you can work out things but if you have to move towards
+24:31
+more adaptivity then possibly you'll be using huristics.
+24:36
+Huristics could be frequency of uh data retrieval from a particular sector.
+24:43
+It could be these kinds of extrapolations like anticipation of how
+24:47
+much more has the tpple base grown for a given index field. Okay. If you have uh
+24:54
+information about the compute available for that particular device server, let
+24:59
+me give you an example. Say um you're working in a in a distributed
+25:05
+environment and you have multiple servers. Okay? And each of them have
+25:10
+different levels of compute. Okay? It's not that this question where I said same
+25:16
+there are different levels of compute. So now you as the global or the the
+25:22
+position from where you are making this kind of an optimization strategy
+25:26
+irrespective of where the query has come to if you're making this decision you
+25:31
+have to ascertain whether these servers are individually capable of performing
+25:36
+that operation right if this has very less compute and
+25:41
+you are working with say one uh billion rows
+25:46
+1 billion tpples and the compute is very very low then you have to take a
+25:52
+decision whether shipping the entire data versus doing that computation there
+25:57
+then you take that kind of decision so if you already know the number of tpples
+26:02
+that you are dealing with then you can take a very structured decision
+26:07
+but if you don't know that how many tpples you're dealing with but you have
+26:12
+an estimate of the compute available to you then you can work around certain
+26:19
+Okay, you can take runtime decisions that if for example if there are less
+26:24
+than 10,000 tpples then do this. If there are more than 10,000 tpples then
+26:29
+do this. So then you can have if and else clauses and build a more dynamic
+26:34
+organization structure earlier which would have had been very structured. Now
+26:39
+you are giving a scope for a little more uh dynamism, optimism, adaptivity etc.
+26:46
+Okay. Is are you getting the point what I just said?
+26:57
+>> Yes ma'am.
+26:59
+>> H any questions regarding all of this so far?
+27:05
+>> Ma'am current framework is like completely static right? Yes,
+27:10
+>> because we have assumed like um the entire sequence of queries that like
+27:14
+that we will perform.
+27:16
+>> Yes. Not only that, if if for example you already have an estimate of the kind
+27:22
+of uh the of the rows that you're going to deal with the tpples, then you can
+27:28
+make it very very static. Okay, you calculate how many tpples are going to
+27:32
+be shipped over versus if the entire data set were to come. and you mean
+27:37
+those explicit calculation and then you work. Okay, means if I sorry let me just
+27:44
+share my screen again. So if
+27:57
+for example what was that? So now if you look at this particular slide, if you
+28:04
+know the sizes of the different tables and how many uh rows you're going to
+28:09
+work with, then this kind of a very structured decision you can make for
+28:14
+optimization. You know exactly what you're dealing
+28:18
+with. And when you're looking for a more dynamic situation where you don't have
+28:23
+the exact numbers, okay, then you might want to stream the
+28:28
+data in blocks instead of the entire table. You might not want that
+28:33
+particular server to have the entire operation done or you stream it. Okay,
+28:39
+means like you do it in batches and you stream batches instead of the entire. So
+28:43
+then you have alternate uh assumptions as to for how long this connection has
+28:48
+to be maintained, partial table coming, for how long do I have to wait. Okay. So
+28:54
+those additional communication costs come into the picture. Okay. So over
+29:00
+here you are just assuming equal optimization because you know how things
+29:05
+are there. You have exact values. But in a more dynamic real world situation then
+29:11
+you have to make allowances. where you don't know how much data
+29:15
+you're going to work with. Neither are you sure of the compute availability for
+29:20
+you. So then you might want to batch things, you might want to stream things.
+29:25
+So then you have to establish a connection for a longer time which adds
+29:29
+to the communication cost. Okay. So those dynamic decisions where you don't
+29:35
+have the entire picture that leads to uh runtime adaptivity.
+29:44
+But here for this particular scenario, we were very structured in the way we
+29:49
+would work. Okay. But you can introduce dynamism
+29:54
+when you're incorporating huristics. Just like I said, you have assumed it
+29:59
+has jumped to 50,000 tpples and uh the communication that we have will not be
+30:04
+able to support the entire transfer in one shot. So you stream the data.
+30:10
+you you say send me 10,000 tpples at a time or you say send me 10 20,000 tpples
+30:16
+at a time. Okay, you as the questioning server versus the answering server.
+30:23
+Okay, so these so in all of the projects that you that you've written most of
+30:28
+them you've talked about this ingestion and runtime adaptivity. This is
+30:33
+essentially what you are doing. Okay,
+30:38
+these are the parameters that you need to consider and which currently systems
+30:43
+are considering. There are considering all of these different parameters
+30:48
+obviously with trade-offs because you see here this is a histic you don't have
+30:52
+the exact values and you're only dealing with parameters that matter at this in
+30:58
+this uh given times h
+31:06
+is it um making sense Any question
+31:27
+anybody? So over here um
+31:36
+this is how uh some examples have been given
+31:48
+right and you can also work around deterministic versus randomized. Now uh
+31:53
+for example if if I asked you a question about using
+31:58
+a randomized strategy. Now see the reason I'm talking about this is when
+32:04
+you are searching for data and you're not using a linear structure for storing
+32:08
+that data what strategy do you think works bests or DFS?
+32:19
+You don't know where your goal state is. Okay. And you have arranged your data
+32:26
+using a nonlinear structure. It's not a link list, a singly linked list. It's a
+32:32
+nonlinear structure. So now if you're searching for your goal set of
+32:36
+information, goal index uh chunk of data. Would you use a DFS strategy?
+32:43
+Would you use use a DFS strategy or what would you do? When do you think uh one
+32:50
+strategy is better over the other?
+32:54
+>> So BFS would be better because you don't want to go all in in like one particular
+32:59
+direction and then that direction turns out to be very bad.
+33:03
+>> Possibly possibly if you have a very bushy kind of uh of an arrangement of
+33:10
+data then a BFS strategy would work. But if you had a more linear arrangement,
+33:16
+more linearly depth wise, then a depth first would work. But if you have both a
+33:22
+very deep uh tree as well as a very bushy tree, then what would you do?
+33:36
+Hm. If you have a huge tree, okay, large
+33:41
+number of indexes and great depth both
+33:55
+then these kinds of strategies uh randomized strategies would work. Let
+34:01
+me give you an example. Say you have two agents.
+34:05
+Okay, one agent is doing the bread first search and the other agent is doing the
+34:12
+depth first search and they're working in parallel.
+34:16
+Do you think that would be a good thing to do
+34:20
+or would you just take randomized chunks, randomized clumps
+34:25
+uh from your particular uh table that you have? just random
+34:32
+pseudo random rather nothing is always random.
+34:36
+If you go by a pseudo random strategy, obviously there'll be a logic behind
+34:41
+that random thing. So one is you use two agents.
+34:45
+You have one doing BFS versus one doing DFS and you have
+34:51
+another agent at the next level which looks or which is waiting for the one
+34:57
+that gives you the correct information in least time the fastest agent. Okay.
+35:02
+So there is another one another level versus just randomly searching across
+35:08
+this entire table. Which one would you like to use and why?
+35:20
+>> I mean if we have enough compute then we can if we can do parallel computation
+35:25
+for both BFS and DFS
+35:27
+>> then we can go for that.
+35:30
+>> That is true. That is true. And for randomization if if if say you don't
+35:35
+have that kind of compute so you cannot um have
+35:41
+these many agents working together in parallel then for randomization here
+35:46
+I've mentioned simulated al have you have you done things like gradient
+35:51
+descent hill climbing
+35:55
+>> has done they've been done right so out of these strategies do you think they
+36:00
+would help you with randomizing ation in some way.
+36:06
+Can you give me an example where it could help?
+36:30
+I mean that could that would depend how data is stored.
+36:36
+H that would depend how data is stored. That is true. It would also depend on
+36:40
+the kind of data that you're working with. That is true. But uh how what
+36:47
+would you do in order to facilitate this kind of randomization? any strategy
+36:52
+whether you take gradient descent or you take simulated anything what are these
+36:58
+strategies doing actually
+37:04
+>> usually in gradient descent we try to minimize the loss but I don't know how
+37:10
+do we uh initiate or how do we uh what do we consider loss in this case I'm not
+37:17
+sure about that
+37:18
+>> so we don't even have a continuous um like like I'm assuming that we don't
+37:24
+have a completely continuous data distribution right like it could be
+37:27
+anything
+37:28
+>> it could be anything
+37:29
+>> that gradient descent won't even be like well defined I think
+37:33
+>> if you know I'm talking about the philosophy of these strategies
+37:38
+the philosophy what is the philosophy underlying these
+37:43
+randomization algorithms
+37:47
+>> we can h
+37:49
+>> we can like build some rand uh like random huristics based on past results
+37:54
+like if I deployed search 10 times then six times my like using BFS was better.
+38:02
+So in the future I will more likely be biased toward using that pattern in case
+38:07
+of search like out of 10 times I'll use six time BFS in that manner.
+38:13
+>> Yeah, that is also a very interesting uh mechanism.
+38:17
+Anything else? any any other thought process
+38:25
+why have the randomization strategies come that is what I'm asking
+38:34
+you are being partial towards a certain strategy that is fine you have um you
+38:40
+have made that uh kind of understanding given all the kinds of queries that you
+38:45
+have handled so far so that that That is perfect.
+38:50
+That is absolutely correct. But when you talk about randomization means randomly
+38:55
+searching around within a given environment.
+38:59
+Okay. What is the philosophy underlying these struct this this mechanism? Why do
+39:04
+you do that? What is the reason for doing it?
+39:12
+>> Because we aren't sure which strategy would be the best here. So trying out
+39:18
+experimenting with the strat the solution which we have.
+39:22
+Let me let me draw a scenario for just just
+39:38
+so say for instance
+39:44
+uh say you have a scenario you have uh data points which are of this kind okay
+39:51
+say graphical structure. You have something say um with related to one
+39:58
+object. Okay.
+40:03
+You have some data, you have um factory data, you have visual data,
+40:14
+you have. Okay, just imagine you have a graphical
+40:19
+structure and this is the kind of data that you have. And here you have further
+40:24
+details. Okay, so this is for object one.
+40:30
+This is another one for object two. Maybe they share the same kind of
+40:34
+tactile information but they have different visuals.
+40:45
+And say you have another object same auditory same allaction but
+40:52
+different visual. Okay. So now if because in in in
+40:58
+randomization you start with a seed value. Right. Now say given a certain
+41:04
+input given a certain input
+41:08
+and based on some similarity factor say these are keys identified by keys
+41:16
+some similarity factor you have been pointed to this particular object. Okay
+41:22
+say you have been pointed to this particular object. So now what you do is
+41:26
+you arrange or you identify a certain window of localization
+41:33
+within which you are going to operate first.
+41:38
+Okay. So within this localized window which could be say uh two steps left,
+41:44
+two steps right or given this particular kind of a database scenario, it could be
+41:49
+say two children or two siblings left, two siblings right in a database or in a
+41:56
+graphical structure. It could be two siblings left, two siblings right. Okay?
+42:00
+So you have that kind of a localized structure. Now within this you search
+42:04
+for your data. Imagine you have a huge table. Okay. So within this structure
+42:11
+you only look at you do your searches whatever it be DFS DFS or both in
+42:15
+parallel. If you find the data that exists well and go otherwise you have to
+42:21
+look out. Okay you have to look outside this
+42:25
+localized branch. So in all of these different scenarios whether it be
+42:30
+simulated amain or it be gradient descent or it be hill climbing what
+42:36
+you're doing is you're giving it a nudge of some delta and you're expanding the
+42:41
+horizon now. So now what happens is earlier what you
+42:51
+were looking at just within this data set over here just this trajectory
+42:57
+within this element you were exploiting your information over there
+43:03
+you were going through every possible uh node to identify whether it is relevant
+43:08
+to your purpose or not. If it doesn't work out, you give it a small nudge and
+43:14
+you move out of this area and now you include a little more information to
+43:19
+search. So you're exploring. Okay? So if you have a lot of
+43:27
+information and you don't know what to do exactly, then you use a hash which is
+43:34
+this some similarity value. you jump to a C a point from where you start your
+43:40
+search. It may not be the root node it could be anything in between any one of
+43:44
+the child nodes maybe. So now given that child node you define a window of
+43:49
+context a context window or a sliding window whatever you want to call it you
+43:55
+define that and now you do your search within that space.
+44:00
+If you get your answer well and good, now you have to look outside to identify
+44:05
+if you have missed out anything or not. What do you do? You add a delta or you
+44:11
+uh reduce your search window. You know, reduce it. I mean just say you move in
+44:15
+either direction. Maybe you incorporate a little more context space and you
+44:21
+search there for relevant data. Okay. So here what you're doing is you're
+44:26
+constantly playing around with exploitation versus exploration
+44:32
+within a window. You're exploiting all the knowledge that you have and then
+44:36
+you're adjusting these delta points to look around a little more.
+44:41
+Okay. So in simulated analing or weather breathing these what what in all of
+44:46
+these strategies the basic philosophy is this.
+44:50
+Okay. you are just moving out of your local circles to find a little more. So
+44:56
+when we talk about dynamic optimization, this is entirely what is happening. You
+45:01
+have a huge database, you have a hash value that takes you to
+45:05
+one particular tpple maybe or say one index, but you don't know if this index
+45:11
+leads you to all the data that you need. So you acquire some of the data and then
+45:18
+you play around with these delta values a little more to check other possible
+45:23
+options. Okay. So this is how you bring in a
+45:28
+little more adaptivity to your entire uh search strategy. And this works well if
+45:34
+you have a large amount of data. Obviously if you have a small amount of
+45:39
+data which is very linearly arranged then it really doesn't matter. But if
+45:43
+you have a very bushy tree arrangement, an entire complex graph structure that
+45:49
+defines how your data points are connected with each other, a very
+45:52
+complex indexing mechanism, then possibly a bit of randomization
+45:59
+allows you to kind of build a tradeoff over using a lot of compute
+46:04
+because you may not be able. See, if you were to work with agents, you might have
+46:09
+to feed the entire tree to them, the entire graph to both of these agents so
+46:14
+that they can work in parallel and come up with solutions, right? Versus feeding
+46:20
+randomized elements of the graph to these different agents so that they can
+46:25
+pursue. So there are different things that can be done actually. You could
+46:29
+have one agent that does the local search versus another agent that
+46:33
+constantly increases the delta and incorporates a little more exploration
+46:38
+within the framework. Okay. So the search algorithms that we have for all
+46:43
+our social media platforms, these are also constantly playing around with your
+46:48
+search history to identify localized nodes and then they're occasionally
+46:54
+incorporating a delta. So for example, you listen to a lot of music of a
+46:59
+particular genre. So that comes a lot on your feed, but occasionally they send
+47:05
+you certain say kittens playing around or um puppies running after birds. They
+47:11
+occasionally send you that and then they look at factors like have you spent time
+47:16
+on it or have you just swiped across it. Okay. So then they take those dynamic
+47:22
+factors and then they reformat their uh localization frameworks.
+47:29
+So that is dynamism. Okay. And static would have an e you know exactly what
+47:35
+has to be done. You know exactly you know the local window that has to be
+47:40
+searched for and you proceed in that direction. Okay. But if you have a lot
+47:44
+of data and you don't you're unsure about the compute power of all of these
+47:51
+uh servers then you might want to build upon dynamism. So now this this
+47:55
+structure will not essentially be a very global mechanism. The global mechanism
+48:01
+will be how these these these servers communicate with each other. Okay. For
+48:07
+how long will this handshaking protocol be alive? Okay. But these decisions of
+48:12
+searching within the server data these are entirely local
+48:17
+local to that uh server's computer. Okay. While these two servers are
+48:22
+communicating in the in the regions of how long do I need to keep this
+48:27
+connection alive for all the transportation to happen because what
+48:32
+happens is if there are two servers the first one is saying are you there
+48:41
+the next one says yes then they send the operator
+48:45
+then they do some compute and then maybe in batches they're sending the data
+48:51
+And then again uh they say I have received these many packets. And then
+48:56
+the other one says okay I have this much left.
+49:01
+Then again this one says are you done? Are you done? This one then says I have
+49:06
+some more. So this constant communication is happening between these
+49:11
+servers to ensure that the data is transported because at any point in time
+49:17
+the network could go off. There could be a hardware failure. So how much data do
+49:23
+I have versus how much is left? If you maintain logistics then it becomes easy
+49:28
+for you to undo something, redo something, reping the server for more
+49:34
+information. Okay. So at the global level, these two servers are
+49:39
+communicating as to how much data needs to be transported and at the local level
+49:44
+they're taking these exploitation versus exploration approaches.
+49:49
+Okay. So this is something uh that s that the kind of uh dynamic load
+49:56
+balancing strategies, dynamic search strategies that are there today across
+50:01
+servers. This is essentially what they are trying to clear out. Okay. And this
+50:06
+is something that you might even think that happens in our brains as well. If
+50:11
+you take these different objects as memories, right? Multimodal memories.
+50:17
+Going back to the problem statement that I had once given the class, you can
+50:21
+actually have a randomized search strategy to work around these indexes of
+50:26
+memories and maybe we do have who knows any question like did you get what I
+50:36
+just said?
+50:43
+>> Remember why would we still call it random? I mean I understand this is a
+50:48
+little probabilistic
+50:49
+>> but still when uh let's take your example taking a window size and taking
+50:54
+small steps but that also we would have tried and tested multiple window sizes
+50:59
+or multiple depths of the tree and then taking up the the best strategy that
+51:04
+would work for us.
+51:06
+>> Why are we still calling it random then? We're calling it random because the
+51:11
+strategy that you might have identified that could work on maybe one kind of
+51:16
+query or maybe a subset of queries, maybe not all queries.
+51:25
+>> But wouldn't I want my strategy to be more deterministic than probability?
+51:30
+>> Ideally, ideally, yes. Ideally, you would want it to be deterministic. You
+51:35
+would definitely want it. But now see these servers the data in these servers
+51:40
+is also growing at their own pace right and you are not telling each other how
+51:46
+much data I have the servers compute might also go up
+51:52
+you might have incorporated a few more uh processor units within that structure
+51:57
+within that particular framework and the other peers in that network may not be
+52:03
+entirely aware of that. Okay. So the strategy what what
+52:08
+deterministic strategies work when you have complete information about the
+52:14
+entire network about all the servers about all the data points that are there
+52:19
+and you have an exhaustive list of all the queries that will come to you. Okay.
+52:25
+But if ra if if what shall I say the initial days of settling down your
+52:30
+entire system you are maybe unaware of all the queries that could be coming to
+52:35
+you right so the exploration strategy might
+52:40
+actually be working before you have identified a deterministic strategy that
+52:46
+would work for all queries. So during the planning of your uh of
+52:52
+engineering your entire database that is the point you might be working with
+52:57
+randomization and when you have the huristics well
+53:01
+settled then you go for a more deterministic approach
+53:05
+okay or if you are open to solving any kind of query then having a randomized
+53:11
+approach would be good. There are pros and cons of both and it entirely depends
+53:17
+upon uh the kind of uh assumptions you have made, the kind of constraints you
+53:22
+have set for your system. Does that answer your question?
+53:28
+>> Yes ma'am.
+53:31
+>> We would always want things to be deterministic always. But that is an
+53:35
+ideal case.
+53:39
+>> Yes ma'am.
+53:40
+>> Any other question? So for very rapidly growing databases
+53:48
+across a distributed environment, these engineering
+53:52
+uh what shall I say huristics have are very important and this is where all
+53:57
+your aim algorithms can actually help you identifying reinforced uh
+54:03
+trajectories, identifying deterministic pathways given
+54:08
+all possible trajectories, finding clusters of trajectories that
+54:13
+work across different uh kinds of query categories. Means say for example you
+54:21
+find a pattern across query categories right you find a strategy that works for
+54:27
+different genres of queries then you might have those kinds of strategies
+54:31
+also you can do anything practically when you
+54:36
+are engineering your system. So understanding the data, understanding
+54:44
+the genre of your data, understanding the behavioral pattern of your data. I'm
+54:49
+not talking about the behavioral pattern of the subject, but the data itself. Is
+54:54
+it rapidly growing? Is it very static in nature? Certain tpples have never been
+55:00
+visited. Certain sections of your database are very frequently visited.
+55:05
+Some of them are very very uh what shall I say very practically never visited
+55:12
+since the first time. So if you maintain these different areas of uh heristics
+55:18
+then you can take very intelligent decisions
+55:22
+and obviously it is not possible to kind of map every situation that could be
+55:28
+there on the planet. It's not possible to do that because we may not know
+55:33
+everything. So that is where you might begin with a
+55:38
+bit of randomization to start with when you have collected sufficient
+55:42
+information about a strategy and then you turn it into a deterministic
+55:48
+mechanism where you have placeholders fixed placeholders for what to do.
+55:57
+Is is is it clear what I just said?
+56:02
+>> Yes ma'am. Mhm.
+56:03
+>> Any other question that is coming to anybody's mind regarding this?
+56:09
+And this is particularly very important this discussion that we are having now
+56:14
+is because of all the 27 projects I think 20 projects are working on this
+56:21
+means have this philosophy inbuilt within the problem statement itself.
+56:27
+You're working on some form of streaming, some form of historic data,
+56:32
+but you need to work on this and you have a large amount of data maybe.
+56:38
+So you might want to actually uh work around these things when you are
+56:43
+engineering your system, when you're data engineering your system.
+56:52
+So what I would suggest is for each of the different projects analyze the kind
+56:57
+of data you're working with think about the data because all of you working on
+57:02
+some form of data right it could be processor data it could be financial
+57:06
+data behavioral data any kind of data or system data itself
+57:13
+try to think of all the different conditions that these data points would
+57:18
+try to reflect. Think of all the different um scenarios that your data
+57:23
+points could reflect and given that what kind of optimization do you think would
+57:28
+work when you're engineering the database with the se this strategy will
+57:32
+work for relational databases as well as non- relational databases they would all
+57:38
+work because this seed similarity index that you have over here this value this
+57:45
+works for any any structure of your data. database, right? So, how
+57:51
+would you engineer this? That is a very interesting question that I would like
+57:55
+all of the groups to actually think about.
+58:02
+uh and a few things that I would like to correct for everyone is when you are uh
+58:09
+talking about or you're referencing something then an intext citation in
+58:14
+text citation means for example if this is something that I have uh taken
+58:19
+inspiration from a particular paper then you site the paper here
+58:25
+okay where one refers to something in the references section some paper or it
+58:33
+could be some chapter, it could be a paper. So this one over here is this one
+58:39
+that you see over here. Okay. So when I say int text citation, this is what I
+58:45
+mean. So if you're say referencing to some
+58:48
+white paper of an organization or you're refering referencing to some
+58:53
+documentation that the tech team for that organization has put up then you
+58:58
+put references in this. Okay. References ideally are in the E or
+59:05
+APA format. You just don't put hyperlinks in the
+59:09
+references. That is part of the reference structure. Okay. And when you
+59:15
+are putting up references, make sure they jump to the paper or the
+59:19
+documentation, not the website for a company. And you must also be a little
+59:25
+mindful whether these links have explicitly chat GPT source mentioned in
+59:31
+them. You don't want to give away that you might have used that as a source for
+59:37
+your information. Okay? So you need to be a little mindful
+59:42
+about these things. uh so these two so across different projects these are
+59:47
+certain observations that I have made and uh you'll see that in the remarks
+59:52
+list okay so you need to be a little careful with
+59:57
+a few things okay okay and any question
+1:00:07
+because uh possibly we will be ending um query optimization over here and now
+1:00:14
+we'll be moving on to things like data cleaning and data provenence.
+1:00:19
+uh we'll be moving to those elements of discussion now on your engineering
+1:00:23
+pipeline any questions
+1:00:33
+so what I would suggest is uh these different queries that have been given
+1:00:37
+in these slides the slides are already shared with you take a look at these
+1:00:42
+queries try to solve them on your own okay think about what kind of
+1:00:47
+optimization you would like to go for and buy. Reason about all the different
+1:00:52
+options you joins, semi- joints, natural joints, theta joints, the the amount of
+1:00:58
+data that you are that you need to transport.
+1:01:03
+Okay? So think about all of them. It would be good to actually solve using
+1:01:08
+pen and paper so that when you actually see the question in the exam,
+1:01:14
+you know what to do. Okay, because this is in fact
+1:01:20
+engineering the entire pipeline. Okay,
+1:01:26
+any question so far?
+1:01:37
+Any doubts? Okay. Uh by the way I checked on
+1:01:45
+September 10th. I think there is a quiz schedule. Okay. It was supposed to be
+1:01:50
+this week but I shifted it to next week. So whatever we have done till today is
+1:01:58
+part of that course. Okay. What I shall do next week uh I'll not uh include in
+1:02:04
+the quiz syllabus. So whatever I have done meaning uh with regards to query
+1:02:10
+optimization with regards to indexing hashing these
+1:02:14
+few things will be there in the quiz. Uh that is point number one. Uh point
+1:02:20
+number two is after the miners um I have a few guest lectures scheduled. You'll
+1:02:26
+be seeing them in the time table. So for all of these uh actually uh
+1:02:33
+guests we have alumni who are in like placed somewhere
+1:02:40
+they plus a colleague. Okay. So we'll be having them talk to us about how data
+1:02:46
+engineering is in the uh industry these days.
+1:02:51
+The kind of security protocols that they have to be mindful about. uh certain
+1:02:56
+engineering strategies that they have to be mindful about in the current
+1:03:00
+scenario. Okay. So after the miners a couple of guest
+1:03:06
+lectures have been scheduled. Okay. There'll be there are two that are
+1:03:12
+there in the list. There'll be another one also from the mana from IBM.
+1:03:19
+Okay. So um I would appreciate if all of you would be there and ask questions
+1:03:26
+so that you kind of understand how the market sounds at the moment actually
+1:03:31
+thinking of how these tools are to be used. Okay.
+1:03:38
+So um any anything that you feel you would uh appreciate more in this class
+1:03:46
+any any kind of discussion that you think
+1:03:49
+uh would be appreciated a little more, would help you understand things a
+1:03:53
+little better. Please let me know. Okay. So, I shall try to see how that
+1:03:59
+can be facilitated in our class. Very good. So, I think we can stop the
+1:04:05
+class here for today and um
+1:04:10
+I shall
+Page 2 of 6 Page 3 of 6Previous

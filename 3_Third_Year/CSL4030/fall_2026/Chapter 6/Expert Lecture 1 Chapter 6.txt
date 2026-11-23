@@ -1,0 +1,1368 @@
+
+1_Expert Lecture (Joydeep)_Big Data Handling
+
+Transcript
+Search transcript
+0:02
+So it's over to you Ji.
+0:04
+>> Thank you. Uh so hi everybody. Uh I think uh thank you first of all to Romy
+0:10
+ma'am for inviting me and um I think um the topic is very current and uh
+0:18
+obviously we will lead up to lakehouse architecture that's the main topic delta
+0:24
+lake lakehouse formats all of that but before that this lecture or this session
+0:29
+uh let's make it an interactive session and it's mostly a uh session which is a
+0:35
+precursor to that because you directly cannot jump into uh lakehouse you need
+0:41
+to have certain prerequisites or certain architectures in place to understand the
+0:45
+problem statements that lakehouse is solving. So having said that, let me
+0:50
+share my screen. Just give me a moment. Just please confirm if you can see my
+0:57
+screen and if my voice is audible overall.
+1:03
+>> All good. All good.
+1:05
+>> Okay. Thank you. So uh I've named this uh slide or talk from map reduce to
+1:12
+lakehouse and how query engines connect both ends. I think that's probably
+1:18
+appropriate uh to where we are headed next. So just a second
+1:26
+this. Yes. Okay. So first things first, what to expect? So uh there there's a
+1:33
+lot of material there is a lot of uh different development work that has
+1:37
+happened in this field. Um and it's not possible obviously to cover all of that
+1:43
+summarize all of that succinctly in a 1 hour uh you know session or lecture. So,
+1:49
+but what I'll try to do and what you can expect is I'll try to tell a binding
+1:53
+story and I'll try to motivate the case for lakehouse and most importantly even
+1:59
+if I'm not able to motivate the case I'll try to um show how everything led
+2:05
+up to it know why we needed a lakehouse um it is not an exhaustive list that I'm
+2:11
+going to you know um say the solutions or the proposals that I make uh will not
+2:16
+be an exhaustive list it is subjective A lot of solutions we have seen in
+2:21
+production real environment and a lot of times they have been dump and a lot of
+2:26
+times they have been very clever you know so much so that we were surprised.
+2:31
+So it is not an exhaustive list yet it is subjective but the main point uh that
+2:36
+I want to make here is uh even while summarizing can we you know create a
+2:43
+minimal set of concepts which you would actually take back and which can
+2:48
+actually make you transition into the lakehouse what are those minimal set of
+2:51
+con concepts so I'll try to cover that a little bit about myself uh my name is
+2:56
+Jep and um uh like ma'am said I work in Zotab. I've been working there for
+3:03
+almost nine years now. I joined as a senior engineer there. I've worked
+3:07
+through data engineering, data science uh for like 13 plus years and I'm
+3:13
+actively involved in the Spark Delta Lake community. Um I have a few
+3:17
+libraries which are open source now. I can share those libraries. You guys can
+3:21
+check it out. So having said that, let's begin today's session.
+3:26
+Okay. So before we start I would like to start with a motivating you know or or a
+3:32
+problem probably what we're trying to accomplish. Now I know you guys have
+3:36
+already covered a lot of the material in the course uh regarding spark regarding
+3:41
+big data nosql streaming all of that right uh eventually what we have all
+3:48
+come to realize is um there is an evolving data set problem. So if you
+3:53
+read here uh so this is a problem that Zotap has faced and just to give you a
+3:58
+brief ZOTAP is a customer data platform. So we um aggregate a lot of different
+4:04
+kinds of customer data across retail um fashion then um gaming uh banking in the
+4:12
+European region. So uh we have clients like Bayern Munich, clients like Ford,
+4:18
+McDonald's, Entane, Douglas, you know uh these are all varied kind of clients.
+4:24
+Somebody is a fashion retail, somebody is a football club, somebody is a car
+4:27
+manufacturer, right? So the problem statement that I want to motivate with
+4:32
+is several partners deliver daily customer and event data sets. So you
+4:36
+receive these data sets, we must clean them, join them to reference data,
+4:40
+calculate audience metrics and publish a table for analysts and the biggest
+4:47
+problem with having these kind of huge data sets and when I say huge uh
+4:52
+generally TB terabytes is the norm and sometimes touching PBS when you really
+4:56
+operate at that scale every processing decision that you make uh has some
+5:02
+dollar figure associated with it and that's what we want to you know um
+5:07
+optimize to ensure that the overall uh not just cost but also the efficiency of
+5:13
+processing is maintained. So the delivery sizes vary some records arrive
+5:17
+late and partners sometimes resend corrected files. So all sorts of issues
+5:22
+you know if the source that you are reading the data from you can never
+5:25
+trust that source. It is truly a commodity uh you know like they say
+5:29
+Hadoop is a commodity hardware. uh we truly deal with data which you know
+5:33
+which can be wrong at any point in time. So just to motivate you with the data
+5:37
+set I'll just uh share another tab. So if you see here uh I've taken just this
+5:43
+is a sample three data points you know three data sets there are like thousands
+5:48
+of them but I just want to tell you or motivate you with this example. So if
+5:54
+you look at look here so the binding ID there will always be an ID. So it's user
+5:59
+ID or ad ID in our case and for user ID 1 you have gender male age is 25 for two
+6:08
+you don't have the gender you have age 35 for three you have just female you
+6:13
+don't have the age and again for the same user you have a purchase event
+6:18
+where he has made two purchases right sneaker and belt and the same user has
+6:23
+made a boot purchase and then there is add toart for another user and so on and
+6:28
+so forth And again if you see on the other end so
+6:31
+this is one case where you know data is coming as an array. Another case where
+6:36
+app data what kind of apps uh the user is browsing that kind of data is
+6:41
+available you know like uh duplicate record or maybe duplicate on ID right so
+6:47
+you want to do some kind of group by or some kind of those operations on it. But
+6:51
+if you see there are multiple such records with add ID 1 and then you have
+6:55
+various kinds of app name right. So now you want to flow all of this data into
+7:00
+this right hand side table right and the problem is there is a lot of decisions
+7:08
+that you need to make. How do you reconcile the data? Uh if you see here
+7:12
+event name is user one has made two purchases. So ideally I should put a
+7:19
+time stamp and put two purchase events and then this product array needs to be
+7:24
+an array of an array because the first purchase was this and the second was
+7:28
+just uh boot right. So similarly uh you have this app name. I just have a app
+7:36
+name string column. However, it should have ideally be an array column or maybe
+7:41
+some business logic will tell me that you know you just need to keep the first
+7:46
+one app per genre. So I I may need to only store fashion and Nike probably. So
+7:53
+as you can immediately see there is the schema evolution problem. There is this
+7:56
+problem of backfilling. What I mean by that is so for user ID 3 I've got female
+8:01
+and someday later I'm going to receive the age right and then immediately they
+8:07
+might actually come back and tell us hey this guy is not female he's a male and
+8:11
+then we would have to update the record so all of this just to say that there is
+8:15
+a central master data set that we all want to create in many uh ways this is
+8:21
+your uh relational data set relational tables that you want to create a master
+8:26
+record from which you want to then make inferences. You want to expose this to
+8:32
+your analysts. You want to expose this to your downstream uh pipelines and
+8:36
+teams who can consume from this. But this is your source of truth, you know.
+8:40
+So having said that, I'll go back to my uh slide. So what are we trying to
+8:45
+really answer here? Uh three questions mainly as you can see here on the right
+8:49
+side. Uh can we process it efficiently? Can we process the data efficiently? Can
+8:54
+we answer questions efficiently? and can we publish and update it reliably? Now,
+9:00
+this third question is probably what we'll cover in the lakehouse u
+9:03
+architecture. Uh but can we process the data efficiently? Uh and I'm pretty sure
+9:09
+you might have already heard about these terms parallelism, input layout, joins,
+9:14
+skew, right? We all do we do all of this to ensure that the data is processed
+9:19
+efficiently with minimal downtime. And then again we we try to answer various
+9:27
+kind of questions. We employ various techniques let's say approximations you
+9:32
+know query planning execution all of that uh just to say this uh you know
+9:37
+main point which I'm uh put here everybody eventually wants a DB which
+9:42
+performs within a SLA. SLA is a service level agreement or uh you know timeline
+9:48
+uh which performs within a timeline that comes at a very low cost while providing
+9:52
+performance guarantees. Now this is a dream to have. This DB is a dream to
+9:56
+have right very low cost performance guarantees. It will scale like anything
+10:01
+and it will work within an SLA and it also is like a database you know a
+10:05
+relational database let's call it that right. So, so what are the choices we
+10:11
+have now? If you were to achieve this kind of performance, what are the
+10:14
+choices we have? So, on one side you have an engine which is which takes care
+10:20
+of both storage and query. Uh let's take an example of posgra you know posgra my
+10:25
+SQL all the relational databases transactional great superb that's what
+10:30
+we want. We want master record. We want a transactional database. But it has a
+10:35
+very high cost. Like you even if you maintain a distributed Postgra server of
+10:40
+thousand nodes, you know, we have scaled our uh postgra uh servers to thousand
+10:46
+nodes and the cost is humongous. So that goes, you know, that flies out of the
+10:50
+window. And then these are somewhere these are also batch data, cheap batch
+10:57
+data. So you want to process them at one go. There can be streaming uh use cases
+11:01
+as well but then nowadays with Delta Lake with lakehouse everything is
+11:06
+converging so I'll come to that uh let's see the next option here next option can
+11:10
+be something cheaper edgebase cassandra or aerospike so um again but if you
+11:18
+choose them you have to make a data modeling choice right now the table
+11:22
+which I showed you is a is literally no SQL I can dump any kind of data on top
+11:26
+of it and then query it but once you go with some kind of a KV store a key value
+11:31
+store you are making a conscious data modeling choice and then you have to
+11:35
+bear the brunt of it. If you are doing point queries, great. But if you were to
+11:39
+do full table scans, the cost and the latency and the performance issues will
+11:44
+very soon start creeping up. And moreover, these are still highcost
+11:49
+databases. You still have to maintain a server. Aerospike is basically a
+11:53
+in-memory variant of um you know, it stores all the uh all your data ids and
+11:59
+k uh the um key values in uh RAM. So that's a much more costly option. It's
+12:06
+mainly used by very high throughput applications maybe banks and you know I
+12:11
+know AEL uses it for sure Flipkart uses it and and then there is Cassandra where
+12:17
+you know you'll have a uh SSD kind of environment where it's not that costly
+12:22
+it's not stored in RAM but it's still costly right so this is one option where
+12:27
+you pay a lot and then there is the other option where you know you want to
+12:31
+have cheap distributed storage the storage comes very cheap And uh nobody
+12:36
+can beat the cost efficiencies of let's say a Google Google cloud storage GCS or
+12:41
+an S3 you know you do want that kind of a cheap storage because you don't know
+12:46
+when these what part of this data will be queried who will be querying this
+12:50
+data somebody might remember you know an analyst might come by once in a month to
+12:55
+query this data and that's the two or three or five queries that he'll fire
+13:00
+you don't want to keep running a server and keep paying to you know run these
+13:05
+queries on top of it when it's just going to be accessed maybe once or twice
+13:08
+in a month. So hence uh it it we are slowly sliding into the you know realm
+13:14
+of query engines. Uh you might have already heard about uh query engines.
+13:19
+Now um the qu the data that resides on this storage obviously needs to be
+13:25
+queried. But the real problem here is we we always say that um our databases
+13:32
+or the type of data storage or the type of databases you choose depends on the
+13:37
+queries that you'll do on the data. But in real world it doesn't work like that.
+13:42
+Uh demands and requirements change every day. So a database or a or a storage
+13:48
+which was designed for OLTP suddenly has demands for OLAP queries. You know you
+13:53
+suddenly want to perform all these roll-ups and cubes and aggregations on
+13:57
+top of it. You know provide counts and various types of analytics on top of it.
+14:02
+While originally it was designed for OOLTP. So you need a very flexible
+14:05
+system where uh yes the uh cost can scale but also the query engine can
+14:12
+scale as well. And I've given you some examples of query engines here. Apache
+14:16
+Spark is probably the most famous. Um, Facebook Presto used to be a query
+14:22
+engine which was you know at very highly um scalable at one point in time. Many
+14:29
+uh companies like Uber and Ola they ran uh Presto which eventually turned into
+14:34
+Trinob uh that's their open source version and then um you have Google
+14:38
+BigQuery which is also a query. It's a hybrid query engine and then there is
+14:43
+Amazon Athena right so whatever we see today the motivation or the talk or the
+14:50
+session will be mostly around query engines but what I want to motivate is
+14:56
+that all of the concepts that we'll see apply to every query engine and apply to
+15:00
+generally to databases as well so if you know a point that actually can go back
+15:05
+and apply to your Cassandra and edge base as well. So having said that let's
+15:10
+move on. So first let me you know do a landscape review and uh for query
+15:15
+engines it's very important to understand uh the landscape how it
+15:19
+evolved and if you see here it's literally uh you know what I have listed
+15:26
+from top to bottom this is exactly how the landscape has evolved. So when we
+15:30
+started out uh back in 2010 u map reduce was the most um say uh
+15:38
+advanced comput uh computing model or programming model. Uh the problem is uh
+15:45
+map reduce you would have to you would only have this mapper and reducer class
+15:49
+where you would have to code everything through those programming interfaces.
+15:53
+Very soon the community realized that this is not going to scale. uh imagine
+15:57
+doing a group by using map and reduce that that is really really you know that
+16:02
+requires a lot of code and at that point in time we used to write Java code there
+16:06
+was not even Scala so there was no brevity in the code as well so
+16:10
+eventually uh newer APIs came up which was beam and crunch crunch or beam are
+16:16
+mostly interchangeable although crunch is obsolete now mostly you'll find
+16:19
+apache beam getting used these provide uh you know declarative transformation
+16:24
+so on top of Map map reduce generically people wrote group buys, reduce buys and
+16:31
+made them available as functions for you know for for use. But then what remained
+16:36
+difficult was obviously the execution cost and the data distribution. Data
+16:40
+distribution, data locality has always been a problem for the entire data
+16:45
+engineering community because and and we'll see that how executors load the
+16:49
+data and how the distribution happens and how that can really create a lot of
+16:53
+skew and problems in terms of movement of data and and then probably in 2015
+16:59
+spark became famous where you would they would provide you richer computation
+17:03
+graphs. I think you've learned all about RDBs and data set and data frame APIs
+17:09
+and it still a lot of it was better than beam but a lot of it remained in the
+17:14
+hands of the developers. You had to choose the operations and you had to
+17:18
+manage the manual uh the expensive movement of the data. you had to
+17:21
+actually know what would get loaded where, how many shuffle partitions used
+17:25
+to uh you need to have and all of that uh nuances to understand how to uh you
+17:31
+know skillfully uh pro process the data. Uh finally I think around 2017 2018ish
+17:39
+uh Spark SQL came into being and uh and the data frame API which brought this
+17:47
+entirely new concept of optimizers. It was not really new. It was already there
+17:51
+in the SQL community. But they were they implemented it in the you know
+17:55
+distributed uh processing community. So this catalyst optimizer actually
+17:59
+revolutionized the entire uh SQL processing part and also it provided a
+18:04
+lot of relational and functional kind of APIs. And I think you've already seen a
+18:08
+lot of these APIs. You're able to call DF. select df.filter and all of that.
+18:13
+All of these are you know part of the relational um algebra already right? you
+18:18
+already do filter, wear conditions, select in a SQL. Uh problems still
+18:24
+remained. Statistics, the skew, the layout, the runtime conditions were
+18:28
+still a concern. And finally, uh I think 2020 when was the first Delta Lake was
+18:34
+launched. Before that, just before that, there was Apache Hoodie which was open
+18:38
+sourced by Uber and then um there was uh iceberg format which was created out of
+18:43
+that and um then data bricks came up with the delta lake format and all all
+18:48
+these three almost converged together and you know kind of revolutionized the
+18:52
+field. Initially there were multiple problems and the community kept growing
+18:56
+and kept fixing all the issues. Finally, you know, we had a very stable Delta
+19:00
+Lakehouse format by 2022, I would say. And the the best part about these APIs
+19:08
+was it was still Spark. All of this if you see still followed the same
+19:13
+progression. Spark SQL internally uses Spark and Spark internally uses the map
+19:17
+produce paradigm and to many and uh to a lot of extent it uses beam constructs as
+19:24
+well. Obviously the functions are not same but the constructs still are still
+19:28
+same and lakehouse just uh moved the legacy forward because they started
+19:33
+using spark and query engines internally. Today lakehouse operates
+19:36
+across uh you know presto and all other query engines but they started building
+19:41
+on top of query engines uh a reliable table format. They started providing
+19:46
+acid properties on top of file systems which was which was the innovation. They
+19:52
+did not try to go and tweak the layer at Spark. They tried to manage the data
+19:56
+better. Obviously, with every new uh tech stack, you would have its own
+20:00
+challenges. Workload design, execution, tuning and operational discipline. All
+20:05
+of these are ongoing processes and the data engineering community kind of works
+20:09
+through them. Okay. So, okay. Uh
+20:14
+I think you are already familiar with Apache Spark. I wouldn't bore you to
+20:18
+death to uh like tell you again the same thing. What is Spark, how it goes and
+20:23
+all of that. But I'll just quickly just touch upon the entire architecture. As
+20:27
+you can see, it's a query engine with in-memory runtime. Very simply put, it
+20:32
+helps you to process data parallelly. That's the simplicity of it and that's
+20:37
+the most uh challenging part of it to process data parallelly to distribute
+20:41
+data evenly across executors, right? and such that it uh reports the heartbeat in
+20:49
+time to the driver. If it fails, it is f fall fault tolerant. It can revive
+20:54
+recomputee the um executor recmp compute the partitions and whatever RDDs it is
+21:00
+calculating and to report back everything on time is where spark shines
+21:05
+and as you can see here a very high overview of where spark today is with
+21:10
+all the formats with the storage with everything right. So you always have
+21:14
+these cluster managers. Um Kubernetes literally you know came up in 2024. This
+21:20
+is the newest edition. We never used to have Kubernetes in fact and uh yarn was
+21:25
+the standard. There was there was a proprietary uh misos as well. So these
+21:30
+cluster managers generally help um provision the driver and then the driver
+21:36
+helps provision the executors and as you can see here Spark sits in between.
+21:41
+There are other libraries which work with spark. There is the storage layer
+21:44
+and then there is the metadata store or metadata always was there. Metas store
+21:49
+was always there. Hive was one of the meta stores but then iceberg delta
+21:52
+hoodie completely revol revolutionized it.
+21:56
+Okay. So next is again one more slide I think mostly to cover our uh bases. So
+22:05
+you already know about RDD lazily evaluated statically typed distributed
+22:10
+collections. So and and and then the next
+22:16
+um evolution or the next abstraction on top of it is the data set and the data
+22:19
+frame API which has strongly typed collections and relational and
+22:23
+functional transformations. And then there is Spark SQL and on the
+22:29
+right side if you see this is an anatomy of a Spark application tree. So when a
+22:35
+spark application is invoked when the spark context or the spark session comes
+22:38
+up uh a job gets created that is exactly when you call an action like collect or
+22:45
+save as text file or whatever you might be simply doing a you know write to park
+22:50
+that is when an action is called that is when the entire tree gets evaluated and
+22:56
+then the job gets split into stages based on white transformations. So you
+23:02
+can think of these that every time you need to shuffle the data a stage gets
+23:06
+created otherwise all the data uh which is your task you you combine all the
+23:12
+narrow transform operations into tasks and the computation um evaluates one
+23:17
+partition. So that's the processing efficiencies that spark brings into
+23:21
+picture and and and hence the concept of narrow and wide transformations and our
+23:27
+awareness about narrow and wide transformations. So I think this is
+23:32
+something that you've already seen and read about. So what I'm going to do is
+23:35
+just to make it a bit uh interactive. Uh I'm going to ask a few questions. Um and
+23:41
+maybe if you want to unmute or if you want to write something uh and and we
+23:47
+can just look at the answers and see uh and this is mostly related to what we
+23:51
+saw in real time pipelines or or or real world pipelines and based on experience.
+23:57
+Uh let's go. So this is one scenario that I want to
+24:02
+talk about where you have the case where executor cores are less than the number
+24:08
+of partitions in the data. So what do you do in this case? There's no right or
+24:13
+wrong answer. again. Uh but yeah, I would just want to know from you guys
+24:22
+if somebody wants to write unmute. Anybody just take just uh take a go at
+24:34
+it. Okay. Um in the interest of time, I'll
+24:41
+move on. Okay. So, uh the point that I'm trying
+24:47
+to make is it depends uh you have if you don't have clust um
+24:53
+executors available in the cluster and there is a lot of times when many jobs
+24:59
+are competing for resources then there's nothing much you can do. Uh but if you
+25:05
+do have them available, you should rerun the job with more executors because this
+25:10
+is this is a simple formula to have in mind. One partition, one task, one core.
+25:15
+As simple as that. So that you have uh so an executor will load a partition,
+25:20
+run one task on it. Uh you know it will take all the narrow transformations,
+25:24
+create a task out of it and one code will be allocated to it. So if you have
+25:28
+10 cores and 20 partitions, the idea again is to parallelize better
+25:34
+because that same job is going to run with twice the time. But you can use
+25:39
+lower resources with more executors, right? Uh if you're using 2GB executors,
+25:44
+you can probably use 1GB executors provided your data allows that. But you
+25:50
+can run the job faster because if time is the constraint, this is something
+25:53
+that you would probably want to do. Okay, next question. If anybody wants
+25:57
+to, this is a very simple question CSV or park or a which one to use? Anybody?
+26:12
+Somebody wants to write. Okay, we've got a shy batch.
+26:23
+Okay. So again the answer is same. You can literally write it depends and I
+26:29
+would not fault you for it. So the idea is whether you have a splitable or a
+26:36
+non-splitable format. This is one one point to uh think about. Uh is CSV
+26:43
+splitable? That's a great question to ask because a lot of times the notion is
+26:48
+CSVs can't be splitted you know because you will not have um these clean
+26:54
+separations generally it's considered that a park is splitable because you
+26:58
+have this schema lying around with every parket file and not the CSV but it turns
+27:03
+out it's not like that if you see on the right side and even I had to you know do
+27:07
+some searching while prepping this uh slides uh where you can see that yes CSV
+27:14
+is splitable under certain conditions and not under certain conditions. So
+27:17
+uncompressed CSV one record per line yes it's splitable CSV read with multi-line
+27:22
+equal to true no single gzip compressed CSV no and then if you want schema
+27:29
+evolution you go for avo even park supports schema evolution now but
+27:33
+generally if you want a row oriented format you would go for a if you want a
+27:36
+columnar kind of format you'd go for park
+27:41
+okay next question is map versus map partitions anybody wants
+27:49
+And the answer would be again it depends right but this time I would you know
+27:56
+lean a bit more towards map partitions because map partitions has this clean
+28:01
+property of loading an entire partition providing you an iterator on top of it
+28:06
+so that you can process on the entire data. So say suppose you were
+28:11
+initializing a huge hashmap which is itself a bloom filter or which is itself
+28:16
+a huge you know table you would want to do it once at a partition level and then
+28:21
+reuse it across the partition so that every record can make uh some
+28:26
+utilization on top of it and as you can see I have put a simple uh you know
+28:30
+difference between so map is like one record per function call map partition
+28:35
+is all records in a single partition call right map is called n times
+28:39
+partition obviously is called p * total number of partitions right so inherently
+28:45
+it has a concept of function reuse right but there are caveats it's not like it's
+28:52
+it's it's a you know panacia because uh there is a higher risk of getting out of
+28:57
+memory because if you yourself are collecting a lot of data and you're
+29:01
+throwing out a huge yourself you're throwing out a huge iterator of rows
+29:06
+then you would not be able to and and it's very difficult to understand in
+29:10
+memory how the object decentralized object will look like. So the entire
+29:15
+thing just blows up in your face and you get an out of memory error. So yes it
+29:19
+can be used and we have like optimized any number of pipelines using map
+29:24
+partition. This is a very simple fix and we have optimized it. One thing that
+29:28
+really helps which I put here and I uh and this is generally across spark is
+29:32
+you to minimize the object creation. The lesser objects, the lesser garbage
+29:37
+collection because again traditionally Spark used to run on JVM but now there
+29:41
+are other engines as well. But the lesser the object creation the uh you
+29:46
+know the lesser the garbage collection and hence your jobs will become faster
+29:49
+and faster and also the memory footprint right uh spark has this entire um
+29:55
+distribution where it sets aside a certain memory and then the dialogized
+29:59
+object comes into memory. So all of that is just better hygiene right. So what
+30:04
+I'll do is now we can go on like this question after question after question.
+30:08
+So what I've done is I've put all of them at one place and so there are more
+30:12
+questions here right. Uh what what should we do? Should we use data set API
+30:16
+versus data frame API uh again data set versus spark SQL JDBC source versus
+30:22
+spark a source? No. And when I say source this is exactly your spark
+30:26
+read.park and spark readad.jdbc JDBC is what I mean. If you have to choose
+30:31
+between a JDBC source and a park source, what will you do? Right? Okay. Uh then
+30:36
+there is if you have if you see within your and when you the problem is not
+30:41
+when you write a pipeline from scratch, you will always write the best code. You
+30:44
+ask AI it will write the best code. Ask AI to maintain a pipeline which has been
+30:48
+written by others and which has been written by other AI. they will start
+30:52
+messing up the pipeline writing these nonsensical um you know downstream
+30:58
+pipelines which could have already been optimized. So example being you'll find
+31:03
+a lot of places explode followed by a map followed by a reduce can this be
+31:07
+optimized you know what about static versus dynamic allocation what about um
+31:12
+should you partition your data you know and and I'll quickly go to the uh
+31:17
+because you to be conscious of time uh and this is the answer these are all the
+31:21
+answers yes data set API is something the real answer is it depends actually
+31:27
+to be honest but And if I were to lean onto something, I would say data set API
+31:33
+because it has a compile time type checking. So you don't want to uh leave
+31:39
+your code to fate to see at runtime if something fails. You want to do some
+31:44
+type checking and you want to use probably the Scala API. Uh again uh for
+31:49
+the next question, data set of Spark SQL. This is experiential SQL is highly
+31:54
+reusable. We have written pipelines in BigQuery and run it in Spark. So that's
+31:58
+the beauty of SQL. Everybody follows NCSQL, you can write things in SQL.
+32:04
+Regarding the source question, JDBC park source whichever source allows predicate
+32:09
+push down. So predicate push down is when you have a you you've written a
+32:15
+filter condition. You've loaded the DF and you've written a filter. So the data
+32:19
+is brought into executor memory and then the executor is performing the filter.
+32:23
+However, if the source itself supports filter, you know, you want to push down
+32:28
+that to JDBC because this JDBC might be somebody else's cost. The JDBC might
+32:34
+belong to the client. So, you want to push down that cost to them, right? And
+32:38
+by the way, Park also supports predicate push down. So, you it's really a trick
+32:43
+question. And and the last and the second one is obviously you can optimize
+32:48
+um explode. If you see an explode followed by a map by a reduce explos
+32:52
+literally scales up the data does a cartition product then does all the
+32:56
+operations. So when you see a cartition product that's a place which definitely
+33:00
+you should look into to optimize. Again answer is dynamic allocation. Uh should
+33:05
+you do partitioning? This is a very interesting question here. I'm talking
+33:09
+about hive style partitioning where you say you know country equal to India,
+33:13
+country equal to uh USA and country equal to UK. Those kind of partitioning
+33:18
+are very good because when you load the file you can directly load based on the
+33:21
+partition but there is a small problem you have to see because if your UK files
+33:27
+are getting lesser updates and India files are getting more updates you know
+33:32
+eventually what will happen is when you keep partitioning you will have it will
+33:36
+result in very small file sizes and small files problem is a you know
+33:40
+well-known problem in the in the in the community where a lot of small files
+33:44
+will create a uh you know with dynamic IC allocation will cause a lot of
+33:48
+exeutor runs where a lot of these small files will be assigned to one one
+33:52
+exeutor and it can we have seen executors getting scaled up to 20 30
+33:56
+40,000 executors running with 5 MB files which is a waste of you know resources
+34:04
+because the minimal uh exeutor memory that you can have is 1 GB that nothing
+34:08
+can go below that basically okay so yeah so the point is uh that I'm trying to
+34:14
+make is okay there is like I said there's more questions and more
+34:17
+prescriptions. I can keep doing out these prescriptions to you and then you
+34:20
+would be like okay you're making sense but right now but not later. How do I
+34:25
+remember so many things? So now the idea that can we really form a minimal set of
+34:29
+concepts that we'll take forward and then using that we can transition into
+34:34
+lakehouse. What's the or rather simply put what's the bare minimum number of
+34:38
+things that we need to know if you go back from this class what's the bare
+34:42
+minimum things that we need to know to move into lakehouse. So first thing I
+34:46
+will again you guys have obviously uh learned this but I'll just reiterate
+34:52
+joins are very important. Join causes shuffle. Anything that causes shuffle is
+34:57
+very important across the pipeline. So three join types that I have listed
+35:01
+here. But then last when I checked and that was yesterday uh I found that there
+35:07
+is there is a new partition aware join that has come in spark 4.0 And then
+35:11
+there is a merge style join which is very close to delta lake has come up you
+35:17
+know so everybody eventually becomes hybrid and everybody tries to copy good
+35:21
+features from others but uh with broadcast has join the concept is very
+35:25
+simple whichever is the smaller data frame you try to broadcast that to the
+35:31
+worker nodes so that you don't do that costly shuffle sort merge join again if
+35:36
+both tables are very huge you first shuffle the data uh based on matching
+35:41
+keys, sort the partitions by the key and then merge them sequentially. Now
+35:46
+sometimes even this sorting operation is an overhead. So you still shuffle the
+35:51
+data, you still you know uh send them based on the keys but then you merge
+35:58
+them based on a hash table. You create a hash table on the uh worker node and
+36:02
+then you do a simply um a get call or or a lookup to put it more succinctly. So,
+36:09
+so these are some of the joints that we definitely need to know. And then
+36:15
+uh another problem that we generally face is the skew. And
+36:22
+uh these are three four techniques that I have written. And these techniques are
+36:26
+like if you go for an interview and they ask you skew you've got to name these
+36:30
+four techniques or at least the first two because if you're not able to talk
+36:36
+about these the interviewer is going to think that you've not understood skew
+36:40
+these are so uh you know cardinal. So the idea is you can look at the you know
+36:47
+stare at the picture on the right hand side and you'll be good to go. The idea
+36:51
+is very simple. One executor is getting overloaded as you can see but the red uh
+36:58
+records are getting into one executor. They're getting overloaded and that
+37:03
+executor is your slowest executor. Everybody will finish their job and wait
+37:08
+for that executor to uh you know complete. So what do you do over here?
+37:13
+Very simple fix provided by Spark itself is enable adaptive query execution. And
+37:17
+we'll talk a little bit about adaptive query execution later but it's just what
+37:22
+it does is exactly what you do manually which is called salting you know. So
+37:28
+what salting does is so you have various say so basically it works by
+37:34
+breaking up a single heavy overloaded key into multiple distinct sub keys. No
+37:39
+uh maybe I'll I'll break it down. So what happens is you have thousand
+37:44
+partitions but then one partition is very heavy. So what you do is you attach
+37:49
+a singledigit integer based on the partition number to the key to ensure
+37:54
+that the data is evenly distributed across partitions. So you have 2,000
+37:58
+partitions every record because of its index right we we have taken 01 02 like
+38:04
+this till 1999 right and we will distribute that data
+38:09
+and every data will get some number right within this range. So eventually
+38:14
+your skew gets resolved by this method where every partition and every
+38:19
+partition should have sufficient memory but every partition will receive this
+38:22
+data and process the data. So this is when you do it manually it's called
+38:26
+salting when adaptive query execution does it for you it's just you just
+38:30
+enable the config and it's done. Then then there are some records which you
+38:35
+can't really do anything about. So these are called hot keys. So we've seen
+38:39
+hotkeys where one user there's a bot on the internet we're just sending you
+38:44
+we're just flooding you with messages and events and we have received millions
+38:48
+and millions of events from that one bot. So what do you do? You can't really
+38:53
+no amount of salting and uh processes can solve this. So you then start trying
+38:58
+these are all you know um steps which you do which you painstakingly figure
+39:04
+out and then you do isolation of these keys and then filter them out. That's
+39:08
+like a very brute force approach but it works. And then there is another
+39:11
+approach which is which is bucketing where the think about it this way. You
+39:17
+have different kinds of uh a lot of evenly or sorry unevenly distributed
+39:23
+partitions and you want to distribute them evenly. So you bucket by say a
+39:27
+partition number and then you sort them and keep it. So you will say that hey
+39:32
+I'm only going to have uh 100 buckets and all my data will go inside these 100
+39:37
+buckets sorted by a key whatever key you have. So that will ensure that you know
+39:43
+you will have an event distribution. So these are like very uh simple approaches
+39:47
+but it works. So quickly moving on. So now I think
+39:52
+this is the most important slide I would say and probably this is something that
+39:56
+I would uh want to talk about a bit at length. So
+40:02
+just stay with me. So if you see here uh this is what a spark query planning and
+40:09
+optimizer um you know looks like. But this is mostly how a query optimizer or
+40:17
+uh or a query planning looks like for almost all query engines. They will
+40:22
+always have a logical phase. They will always have a physical phase. They will
+40:25
+have a cost of the physical plan. Okay. So what happens here is there is a
+40:31
+logical part where it tries to analyze the queries and understand the shape and
+40:37
+size of the queries and then there is a physical part physical plan where it
+40:42
+tries to understand how now it will process this data and it creates
+40:46
+candidate plans and then there is a cost model which decides which plan will be
+40:51
+chosen based on some concept of reward function or some cost model and then the
+40:57
+selected plan is chosen and then There is a code generation phase which tries
+41:02
+to derive uh code out of it. Now this might be very hazy. So I've created a
+41:07
+nice visualization for you guys using AI obviously. So if you see here this is
+41:15
+exactly the diagram which I was showing you on the on the uh top you know
+41:22
+exactly that right you have this SQL you have uh the logical phase it's cleanly
+41:28
+demarcated you have the physical uh plans the the candidate plans you have
+41:34
+the cost model with the physical plan and you have the executed let's let's go
+41:38
+through them one by one let's look at the look at an example first what are we
+41:41
+trying to you know so just keep this diagram in mind it's just above and it's
+41:45
+the same diagram you know and I've also put a section on adaptive query
+41:48
+execution as I was talking about so this is the query that we're trying to run
+41:52
+there's a data set obviously I've been speaking about profiles and activity
+41:56
+some users they're doing some events you know purchase this and that right so
+42:00
+we're trying to join this table let's say and we're trying to do a group by on
+42:06
+city and there is a filter condition on India and then there is probably uh
+42:12
+where condition on event date right and we are joining the profiles in the
+42:16
+activity and then there is a count right so this is the operation that we are
+42:21
+trying to do this will be our running example and then let's go and see what
+42:25
+happens in the unresolved logical plan stage so if you see the unresolved so
+42:30
+first what is a logical plan simply put it looks at the what of the query and
+42:37
+the physical plan looks at the how of the query
+42:40
+So the logical plan is a tree of relational operations describing the
+42:44
+result. This is independent of the execution
+42:48
+algorithm. It just looks at the tree, optimizes the tree. Every query is an
+42:52
+abstract syntax tree. Uh SQL queries and the tree can be optimized, can be
+42:58
+rearranged in a way so that it can be processed better without even knowing
+43:01
+whether you need a join, whether what kind of data is there, how much, what is
+43:05
+the data size, all of that. devoid of all of that the entire tree can be
+43:10
+rearranged in a way where the operations will become optimized and we'll we'll
+43:14
+see some examples of that. So first let's look at what happens in the
+43:17
+unresolved logical plan phase which is the parsing phase. So at this point
+43:22
+Spark takes you at phase value. You've given a query spark just recognizes it
+43:26
+has to be a perfect right query I mean the query structure has to be correct
+43:30
+you know it recognizes the query structure. So we queried on p.tity
+43:34
+and this is an unresolved reference. What it means is spark at this point
+43:39
+hasn't checked that the schema actually confirms to this or not. If you were to
+43:44
+write let's say p.cty what would happen
+43:49
+right? So the parsing phase will succeed but the analysis phase will fail. at the
+43:53
+analysis phase or this analyzed logical plan or the analysis phase. This is
+43:57
+actually when it goes and checks you know resolves the tables, the columns,
+44:01
+the functions you know checks the types whether you have you've given a uh equal
+44:06
+condition and given a int while the column is a string. So all of these type
+44:12
+checks are happening at this point and it also gives a unique ID to it. this
+44:17
+hash12 city hash12 because you might have many other data frames which you
+44:22
+are joining and everyone has a city so it needs to uniquely identify city in
+44:26
+every data frame right so it gives a unique ID and and if you give anything
+44:31
+wrong at this point the analysis phase will fail then comes the optimize phase
+44:35
+which I was talking about and let's so this rewrites the result tree while
+44:39
+preserving its meaning what does it mean let's look at an example so simply put
+44:45
+if you can look at the left hand side here we have the profile like always we
+44:49
+have the profiles and the activity table which we are joining on on the user ID
+44:53
+so we joined on the user ID uh based on that query which I was showing right so
+44:59
+going back to the query right we joined on the user ID right and then there's a
+45:04
+filter there's a group by and all of that so let's go back so we have a join
+45:08
+on user ID we have a filter on date and country and then we have a group by city
+45:13
+and then account right this is the steps that we have provided in our query. When
+45:19
+it rewrites what it does, it it pushes down this filter. Uh it realizes that
+45:24
+activity has this date column and profiles has this country column. So you
+45:29
+don't need to bring the entire profile and activity table into memory only to
+45:34
+then filter them. So what it does is it pushes down the filter, filters the
+45:38
+table first and then brings the residual data to join them and then the group by
+45:42
+ECD. So these are the kind of operations. This is a conceptual
+45:45
+operation nothing to do with how what kind of data is there how much data this
+45:50
+data almost always the worst case is the entire table that you've given a very
+45:55
+broad filter the entire table will be filled right but the average case is it
+46:00
+will you know pull up a lesser amount of data right so this is the logical um
+46:06
+plan the optimized logical plan after this the actuation phase comes into
+46:12
+picture right a a tree of executable able operators. Now you've you've asked
+46:16
+for a join. Which join to choose? Should we go with a broadcast hash join? Should
+46:20
+we go with a sort merge join? This decision is very important because it
+46:25
+requires a lot of heavy lifting from the cost models angle because it has to make
+46:31
+a make a choice based on whatever evidence it has till now. So based on
+46:35
+the current evidence uh you see u it it so what it says is okay one one of the
+46:43
+choice let's say uh one of the choices is broadcast hash join where you build
+46:48
+hash tables from profile this is basically building the broadcast
+46:52
+variable broadcasting it to activity workers and then probe with activity
+46:55
+records right you do the lookup and then the other is shuffle both inputs by user
+47:01
+ID sort each input partition merge matching keys
+47:05
+Right now these are two candidate strategies and spark can come up with n
+47:09
+such candidate strategies but then there is this cost modeling right which now
+47:15
+tries to look at empirical data and figure out what works what doesn't work
+47:19
+which one to choose strategy has been proposed so if it's a small profile
+47:23
+which means you know profiles are 4 MB just 4 MB of data easily it can be
+47:28
+broadcasted so broadcast hash will be chosen because short merge would
+47:33
+probably then shuffle 100 GB of data and if you see uh the CPU so it just tells
+47:38
+you the amount of work spark will be doing the data movement in this case is
+47:42
+80 MB versus 100GB CPU work is build plus the lookup on the hash table here
+47:48
+it is sort and merge input at a executor level at a executor level you're
+47:52
+building right and you're probing the hash table and at the other side you are
+47:56
+just sorting and merging the inputs merge sort and then
+48:02
+and then you have the memory spill whatever happens you know because uh how
+48:06
+you estimated the work. So there is a small build there can be you know a hash
+48:11
+table size uh or or or rather even the small build can actually spill data but
+48:17
+that considering that these two are not the deciding factor. We can see that the
+48:22
+data movement probably can become the deciding factor here. But the cost model
+48:25
+takes all of this into consideration and large profiles are like maybe broadcast
+48:30
+hash would cons would be actually broadcasting 160GB
+48:34
+and and imagine all of this happening. You are not the one looking at this
+48:38
+data. These are pipelines which are running daily, monthly, hourly, you
+48:44
+know, every uh every week. At any point in time the data can be 80
+48:52
+MB in the profile and the data can suddenly become 160GB. Spark takes care
+48:57
+or query engines I would you know at this point I would like to bring in the
+49:00
+fact that query engines take care of this out of the box. We need to know the
+49:05
+me mechanism because sometimes we need to override these mechanisms because we
+49:09
+understand that broadcast probably wouldn't work but most of the times the
+49:12
+query engines provide these facilities. So um like I said so in this case
+49:18
+probably uh you know uh if it's a large profile sort merge will be preferred.
+49:22
+Let's see what was selected. No it was broadcast hash which was selected. So so
+49:27
+the idea is because at this phase the selected plan comes out which is as you
+49:33
+can see it was the broadcast uh join right this is the selected plan and
+49:40
+finally now this is all about logical and physical plan. Now there is
+49:44
+something called a um whole stage code gen
+49:50
+which is after so much planning and so much execution there is still more
+49:55
+optimizations that can be done on this pipeline that part is and I will I will
+50:00
+um try to um tell you about the iteration style here iterator style here
+50:05
+so basically if you see here when you write a
+50:10
+uh count filter and scan let's take this example you scan and the data you filter
+50:14
+the data and then do a count on it you know. So in an iterator style there will
+50:19
+be or in the iterator you have the next method there will be a next call you
+50:25
+know and that next call will actually uh so the count will call the filters next
+50:31
+which will give you the matching row and to concretize this let me share another
+50:36
+screen. Okay. Uh so if you see here what is
+50:41
+happening the count has counted incremented the count called the next
+50:46
+method which goes back and calls the filters next filter calls uh filter goes
+50:50
+and asks scan is there any matching row. Scan gives back the result. The matching
+50:55
+row there's a non-matching row non-matching row right and then after
+50:58
+next there comes a matching row which it returns to count and then there is a
+51:02
+count increment that happens. There is a lot of method calls that are happening
+51:07
+one after the other and and this entire uh you know operator boundaries uh there
+51:14
+is everybody who is has his own cost. Now this might look like very trivial
+51:17
+when we run it in our machines but when it goes for pabytes of data we have
+51:22
+processed at 1 130 billion records in one go you know when I say records these
+51:28
+are user ids 130 billion user ids which have each record is probably uh close to
+51:34
+2 MB you know so at that point all these small improvements matter so there is
+51:40
+lot of iterator calls which is happening what spark or any query engine as a
+51:46
+matter of fact will do for you is it will generate a bite code for you as if
+51:51
+you wrote this method. It will immediate. So just imagine so many
+51:56
+method calls filter scan coming back to count so many of these things happen and
+52:01
+suddenly instead you wrote code like map dot say filter.count df.load
+52:08
+filter.count account. You wrote this code and somehow Spark optimized it in a
+52:12
+way that as if you wrote one method which is this while where input is there
+52:17
+you know uh put this row check if it matches the filter and then increment
+52:21
+the count this is literally JVM level byte code that gets generated and this
+52:28
+code is actually run instead of the uh you know the general code and that is
+52:33
+what whole stage code gen that's the whole stage part of it represents
+52:38
+because the more it can fuse these code together, the more it can take supported
+52:43
+operators and fuse them, the better your execution becomes. So, so that is the
+52:49
+beauty of these query engines that they can do optimizations at a very granular
+52:54
+level and even then this is not yet done. So, as if this was not enough, we
+52:59
+would move to uh adaptive query execution. The concept is
+53:05
+simple. Uh let's go to this plan where we or
+53:11
+rather this cost model. Yes ma'am. Um
+53:15
+>> J I think we would have to maybe stop here for today. Maybe we could we could
+53:21
+continue in the next class.
+53:23
+>> So I think I just have I just need two more minutes to finish this one and then
+53:27
+then I don't have much material after that. Much after that it's all fillers.
+53:32
+>> Okay. Okay.
+53:34
+>> Okay. So uh what I was saying is if you look at this cost model the
+53:40
+uh estimated this was some 160GB or something but while at runtime the
+53:46
+adaptive query execution uses statistics from materialized query part of the
+53:51
+stage is run. So there is an initial plan which ran some stage ran and at
+53:56
+that point the job observes its states and revises the plan. it replans
+54:02
+everything to do better. So, so an example here is maybe it estimated 800
+54:10
+MB and then it actually figured out that the size is 4 MB. So, initially it the
+54:15
+choice was sort join and when it actually figured out that the size is 4
+54:20
+MB, it immediately changes the join to a broadcast hash join. So, this is
+54:24
+basically the crux of it and it handles a lot of things. It handles shuffle
+54:28
+partitions you know dynamically like you have small partitions it will mer fuse
+54:32
+them into one you know and run them efficiently. An example is this you have
+54:37
+one big partition very uh small partitions just immediately it will just
+54:41
+break it up into four partitions as simple as that. So yeah so this is more
+54:46
+or less the kind of optimizations these query engines do and I think we are
+54:51
+mostly at time. So I just wanted to talk about accelerators and uh I think yeah
+54:57
+we can we can talk about this in the next class man.
+55:01
+>> Thank you so much and uh maybe for the interest of time
+55:06
+and possibly they have another class maybe in the next class we could have
+55:11
+some of the questions that possibly students have and um then we could
+55:18
+continue our discussions as well. Okay. And um I believe this was a very very
+55:24
+important session uh for the students. If you have any
+55:29
+questions please make a note of them and u I understand you have a class. So in
+55:35
+the next session we shall uh get all your questions answered and if you have
+55:40
+any in between if again this is kind of requesting too much. If you have any
+55:47
+questions, maybe you could make a note of them. Send them over to me and I
+55:51
+could send it over uh to Joy Deep and we could see how we could facilitate that.
+55:57
+Okay. So, feel free to send over your questions to me and uh maybe we could
+56:03
+make this a little more streamlined. Okay? Because you you wouldn't have to
+56:07
+wait for two weeks to get your questions answered. Okay? So please feel free to
+56:13
+share them with me and I'll send them over to uh joy leaf as a consolidated
+56:19
+list and then we can have them answered.
+56:21
+>> Yes. Now I'll share the slide up till this point and the HTML file which I
+56:25
+have prepared.
+56:25
+>> Great. Great. That would be fantastic. Okay. So thank you so much everyone and
+56:31
+we shall meet again soon. Okay. And thank you Jay for your time and for
+56:36
+helping us.
+56:38
+>> Thank you.
+56:39
+>> See you. Bye.
+56:40
+>> See you. Bye-bye. Have a good day everyone.
+56:47
+Okay.
+Displaying 1_Expert Lecture (Joydeep)_Big Data Handling.

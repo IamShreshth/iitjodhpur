@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IIT Jodhpur — Course Resources</title>
+  <meta name="description" content="Course resources for IIT Jodhpur, organized by academic year and course.">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #4a4a4a;
+      --border: #cccccc;
+      --link: #0052cc;
+      --link-hover: #003380;
+      --card-bg: #f8f9fa;
+      --tag-bg: #eaecef;
+      --code-bg: #f0f2f5;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --text: #f0f0f0;
+        --text-muted: #b0b0b0;
+        --border: #333333;
+        --link: #58a6ff;
+        --link-hover: #79c0ff;
+        --card-bg: #1c1c1c;
+        --tag-bg: #2d2d2d;
+        --code-bg: #222222;
+      }
+    }
+
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #4a4a4a;
+      --border: #cccccc;
+      --link: #0052cc;
+      --link-hover: #003380;
+      --card-bg: #f8f9fa;
+      --tag-bg: #eaecef;
+      --code-bg: #f0f2f5;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #f0f0f0;
+      --text-muted: #b0b0b0;
+      --border: #333333;
+      --link: #58a6ff;
+      --link-hover: #79c0ff;
+      --card-bg: #1c1c1c;
+      --tag-bg: #2d2d2d;
+      --code-bg: #222222;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: var(--bg);
+      padding: 24px 16px 60px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 2px solid var(--text);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span {
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--text);
+    }
+
+    p {
+      margin-bottom: 16px;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      color: var(--link-hover);
+    }
+
+    .search-container {
+      margin: 20px 0 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-family: inherit;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      background: var(--card-bg);
+      color: var(--text);
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--text);
+    }
+
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .filter-chip {
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 10px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .filter-chip.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+      font-weight: 600;
+    }
+
+    .course-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 24px 0 40px;
+    }
+
+    .course-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--text);
+      padding: 18px;
+      border-radius: 4px;
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .course-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .course-sem {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .course-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .course-description {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .resources-line {
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .resource-pill {
+      background: var(--tag-bg);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .course-link {
+      font-size: 15px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 36px 0 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 15px;
+    }
+
+    .info-table th, .info-table td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    .info-table th {
+      background: var(--card-bg);
+      font-weight: 700;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+
+    footer {
+      margin-top: 48px;
+      border-top: 2px solid var(--text);
+      padding-top: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>IIT Jodhpur — <span>Course Resources</span></h1>
+    <div class="top-actions">
+      <a href="https://github.com/IamShreshth/iitjodhpur" target="_blank"><strong>GitHub Repo ↗</strong></a>
+      <button class="theme-toggle" id="themeToggle">🌓 Toggle Theme</button>
+    </div>
+  </header>
+
+  <p>
+    Browse course materials organized by academic year. Open a course folder to find its semester-specific files. The repository also includes a B24 resource archive.
+  </p>
+
+  <!-- Search & Filters -->
+  <div class="search-container">
+    <input
+      type="search"
+      id="searchInput"
+      class="search-input"
+      placeholder="Filter courses or topics (e.g. CSL1010, operating systems, circuits)..."
+      autocomplete="off"
+    >
+    <div class="filter-chips">
+      <button class="filter-chip active" data-filter="all">All</button>
+      <button class="filter-chip" data-filter="math">Math</button>
+      <button class="filter-chip" data-filter="cs">CS</button>
+      <button class="filter-chip" data-filter="physics">Physics</button>
+      <button class="filter-chip" data-filter="chem">Chemistry</button>
+      <button class="filter-chip" data-filter="mech">Mechanics</button>
+      <button class="filter-chip" data-filter="ee">Electrical</button>
+      <button class="filter-chip" data-filter="bio">Bioengineering</button>
+    </div>
+  </div>
+
+  <!-- Course List -->
+  <main class="course-list" id="courseList">
+
+    <!-- CSL1010 -->
+    <article class="course-item" data-category="cs" data-keywords="csl1010 introduction to computer science programming c python lab problems practice fall spring papers">
+      <div class="course-header">
+        <span class="course-code">CSL1010</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Introduction to Computer Science</div>
+      <div class="course-description">Problem solving with C & Python, memory layout, control structures, pointers, recursion, data representation, and lab practice problems.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Fall 2025</span>
+        <span class="resource-pill">Spring 2026</span>
+        <span class="resource-pill">Lab Practice Problems</span>
+        <span class="resource-pill">Past Exam Papers</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/CSL1010" target="_blank">Open CSL1010 Directory on GitHub →</a>
+    </article>
+
+    <!-- PHL1010 -->
+    <article class="course-item" data-category="physics" data-keywords="phl1010 electromagnetics and optics physics electrostatics magnetostatics vector calculus griffiths minor major exam papers">
+      <div class="course-header">
+        <span class="course-code">PHL1010</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Electromagnetics and Optics</div>
+      <div class="course-description">Vector calculus, electrostatics, magnetostatics, Maxwell's equations, wave optics, interference, diffraction, and Griffiths reference books.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lecture Slides</span>
+        <span class="resource-pill">Tutorial Sheets</span>
+        <span class="resource-pill">Griffiths Books</span>
+        <span class="resource-pill">Minor & Major Exams</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/PHL1010" target="_blank">Open PHL1010 Directory on GitHub →</a>
+    </article>
+
+    <!-- BBL1020 -->
+    <article class="course-item" data-category="bio" data-keywords="bbl1020 intro to bioengineering biology bioenergetics genetics lac operon lecture slides">
+      <div class="course-header">
+        <span class="course-code">BBL1020</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Introduction to Bioengineering</div>
+      <div class="course-description">Bioenergetics in living systems, lac operon regulation, cellular machinery, genetics, and comprehensive lecture decks.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Bioenergetics 1-5</span>
+        <span class="resource-pill">Lecture Slides</span>
+        <span class="resource-pill">Important Points</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/BBL1020" target="_blank">Open BBL1020 Directory on GitHub →</a>
+    </article>
+
+    <!-- MAL1010 -->
+    <article class="course-item" data-category="math" data-keywords="mal1010 mathematics calculus limits continuity series riemann integration thomas algebra past papers exam">
+      <div class="course-header">
+        <span class="course-code">MAL1010</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Mathematics I</div>
+      <div class="course-description">Calculus, limits, continuity, sequences & series, Riemann integration, multivariable calculus, and Thomas' Calculus reference.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Slides (1-16)</span>
+        <span class="resource-pill">Tutorials (1-11)</span>
+        <span class="resource-pill">Important Points</span>
+        <span class="resource-pill">Books</span>
+        <span class="resource-pill">Past Papers</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/MAL1010" target="_blank">Open MAL1010 Directory on GitHub →</a>
+    </article>
+
+    <!-- MAL1020 -->
+    <article class="course-item" data-category="math" data-keywords="mal1020 mathematics linear algebra ode pde eigenvalues differential equations laplace past papers exam major minor">
+      <div class="course-header">
+        <span class="course-code">MAL1020</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Mathematics II</div>
+      <div class="course-description">Linear algebra, vector spaces, eigenvalues/eigenvectors, first & second order ODEs, power series, and Laplace transforms.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lecture Slides</span>
+        <span class="resource-pill">Problem Sheets 1-5</span>
+        <span class="resource-pill">Tutorial Solutions</span>
+        <span class="resource-pill">Minor & Major Papers</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/MAL1020" target="_blank">Open MAL1020 Directory on GitHub →</a>
+    </article>
+
+    <!-- MEL1010 -->
+    <article class="course-item" data-category="mech" data-keywords="mel1010 engineering mechanics statics dynamics fbd trusses friction tutorials quiz major exam papers">
+      <div class="course-header">
+        <span class="course-code">MEL1010</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Engineering Mechanics</div>
+      <div class="course-description">Statics & dynamics of particles and rigid bodies, free-body diagrams, friction, trusses, virtual work, and tutorial prep.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Statics & Dynamics</span>
+        <span class="resource-pill">Assignments</span>
+        <span class="resource-pill">Tutorial Prep</span>
+        <span class="resource-pill">Quizzes & Major Exams</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/MEL1010" target="_blank">Open MEL1010 Directory on GitHub →</a>
+    </article>
+
+    <!-- CYL1010 -->
+    <article class="course-item" data-category="chem" data-keywords="cyl1010 chemistry physical organic inorganic quantum surface electrochemistry minor major exam papers">
+      <div class="course-header">
+        <span class="course-code">CYL1010</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Chemistry</div>
+      <div class="course-description">Physical, inorganic, and organic chemistry topics: quantum theory, spectroscopy, electrochemistry, and coordination chemistry.</div>
+      <div class="resources-line">
+        <span class="resource-pill">OC / IOC / PC</span>
+        <span class="resource-pill">Lecture Notes</span>
+        <span class="resource-pill">Slide Summaries</span>
+        <span class="resource-pill">Minor & Major Exams</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/CYL1010" target="_blank">Open CYL1010 Directory on GitHub →</a>
+    </article>
+
+    <!-- CY-LaB -->
+    <article class="course-item" data-category="chem" data-keywords="cy-lab cylab chemistry lab laboratory practicals observation manual">
+      <div class="course-header">
+        <span class="course-code">CY-LaB</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Chemistry Laboratory</div>
+      <div class="course-description">Laboratory manuals, experimental guidelines, titration observation procedures, and experiment writeups.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lab Manuals</span>
+        <span class="resource-pill">Guidelines</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/CY-LaB" target="_blank">Open CY-LaB Directory on GitHub →</a>
+    </article>
+
+    <!-- EEL1010 -->
+    <article class="course-item" data-category="ee" data-keywords="eel1010 introduction to electrical engineering circuits dc motor past major papers questions">
+      <div class="course-header">
+        <span class="course-code">EEL1010</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Introduction to Electrical Engineering</div>
+      <div class="course-description">Circuit theory, Kirchhoff's laws, AC circuits, DC motors, and past Major examination question collections.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Circuit Theory</span>
+        <span class="resource-pill">DC Motors</span>
+        <span class="resource-pill">Major Papers</span>
+        <span class="resource-pill">Question Sets</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/EEL1010" target="_blank">Open EEL1010 Directory on GitHub →</a>
+    </article>
+
+    <!-- CS -->
+    <article class="course-item" data-category="cs" data-keywords="cs communication skills presentations writing assignments">
+      <div class="course-header">
+        <span class="course-code">CS</span>
+        <span class="course-sem">First Year</span>
+      </div>
+      <div class="course-name">Communication Skills</div>
+      <div class="course-description">Technical presentations, professional reporting, resume formats, and assigned class presentations.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Assignments</span>
+        <span class="resource-pill">Writing Notes</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/1_First_Year/Communiocation%20Skills%20(CS)" target="_blank">Open CS Directory on GitHub →</a>
+    </article>
+
+    <!-- CSL2010 -->
+    <article class="course-item" data-category="cs" data-keywords="csl2010 machine learning classification normalization evaluation svm decision trees neural networks clustering">
+      <div class="course-header">
+        <span class="course-code">CSL2010</span>
+        <span class="course-sem">Second Year</span>
+      </div>
+      <div class="course-name">Machine Learning</div>
+      <div class="course-description">Lecture materials covering classification, model evaluation, support vector machines, neural networks, and clustering.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lecture Notes</span>
+        <span class="resource-pill">Past Papers</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/2_Second_Year/CSL2010" target="_blank">Open CSL2010 Directory on GitHub →</a>
+    </article>
+
+    <!-- CSL2020 -->
+    <article class="course-item" data-category="cs" data-keywords="csl2020 data structures algorithms asymptotic notation recurrences linked lists trees hashing graphs">
+      <div class="course-header">
+        <span class="course-code">CSL2020</span>
+        <span class="course-sem">Second Year</span>
+      </div>
+      <div class="course-name">Data Structures and Algorithms</div>
+      <div class="course-description">Lecture materials on data structures, sorting, hashing, trees, and graphs, with quizzes and solutions.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lectures</span>
+        <span class="resource-pill">Quizzes</span>
+        <span class="resource-pill">Solutions</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/2_Second_Year/CSL2020" target="_blank">Open CSL2020 Directory on GitHub →</a>
+    </article>
+
+    <!-- CSL2060 -->
+    <article class="course-item" data-category="cs" data-keywords="csl2060 software engineering lifecycle requirements uml architecture testing project management">
+      <div class="course-header">
+        <span class="course-code">CSL2060</span>
+        <span class="course-sem">Second Year</span>
+      </div>
+      <div class="course-name">Software Engineering</div>
+      <div class="course-description">Materials on software lifecycle, requirements, architecture, testing, and project management.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lecture Slides</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/2_Second_Year/CSL2060" target="_blank">Open CSL2060 Directory on GitHub →</a>
+    </article>
+
+    <!-- CSL3030 -->
+    <article class="course-item" data-category="cs" data-keywords="csl3030 operating systems synchronization shell scripting labs quizzes practice">
+      <div class="course-header">
+        <span class="course-code">CSL3030</span>
+        <span class="course-sem">Third Year</span>
+      </div>
+      <div class="course-name">Operating Systems</div>
+      <div class="course-description">Operating systems lab materials, practice papers, and synchronization resources.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lab Materials</span>
+        <span class="resource-pill">Practice Papers</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/3_Third_Year/CSL3030" target="_blank">Open CSL3030 Directory on GitHub →</a>
+    </article>
+
+    <!-- CSL4030 -->
+    <article class="course-item" data-category="cs" data-keywords="csl4030 data engineering data cleaning">
+      <div class="course-header">
+        <span class="course-code">CSL4030</span>
+        <span class="course-sem">Third Year</span>
+      </div>
+      <div class="course-name">Data Engineering</div>
+      <div class="course-description">Data engineering course materials, including data-cleaning resources.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lecture Materials</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/3_Third_Year/CSL4030" target="_blank">Open CSL4030 Directory on GitHub →</a>
+    </article>
+
+    <!-- EEL3030 -->
+    <article class="course-item" data-category="ee" data-keywords="eel3030 communication systems communications modulation past papers">
+      <div class="course-header">
+        <span class="course-code">EEL3030</span>
+        <span class="course-sem">Third Year</span>
+      </div>
+      <div class="course-name">Communication Systems</div>
+      <div class="course-description">Communication systems lecture materials and past papers.</div>
+      <div class="resources-line">
+        <span class="resource-pill">Lecture Materials</span>
+        <span class="resource-pill">Past Papers</span>
+      </div>
+      <a class="course-link" href="https://github.com/IamShreshth/iitjodhpur/tree/main/3_Third_Year/EEL3030" target="_blank">Open EEL3030 Directory on GitHub →</a>
+    </article>
+
+  </main>
+
+  <!-- Fast Clone Instructions -->
+  <h2>Local Git Clone</h2>
+  <p>To clone the entire resource collection directly to your machine:</p>
+  <pre><code>git clone https://github.com/IamShreshth/iitjodhpur.git</code></pre>
+
+  <h2>Repository Structure</h2>
+  <pre><code>1_First_Year/CourseCode/semester_professor/
+2_Second_Year/CourseCode/semester_professor/
+3_Third_Year/CourseCode/semester_professor/
+4_Fourth_Year/
+B24/
+docs/</code></pre>
+
+  <footer>
+    <p>Maintained by <strong><a href="https://github.com/IamShreshth" target="_blank">Shreshth Dhimole</a></strong> only • Thanks to <strong><a href="https://github.com/abhishekreddy22" target="_blank">Abhishek Reddy</a></strong></p>
+    <a href="https://hits.sh/github.com/IamShreshth/iitjodhpur/"><img alt="Views" src="https://hits.sh/github.com/IamShreshth/iitjodhpur.svg?style=flat&label=Views"/></a>
+  </footer>
+
+  <script>
+    // Search and filter logic
+    const searchInput = document.getElementById('searchInput');
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const courseItems = document.querySelectorAll('.course-item');
+    let activeFilter = 'all';
+
+    function runFilter() {
+      const q = searchInput.value.toLowerCase().trim();
+      courseItems.forEach(item => {
+        const cat = item.getAttribute('data-category');
+        const kw = item.getAttribute('data-keywords').toLowerCase();
+        const matchesCat = activeFilter === 'all' || cat === activeFilter;
+        const matchesQuery = !q || kw.includes(q);
+        item.style.display = (matchesCat && matchesQuery) ? 'block' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', runFilter);
+
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        filterChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeFilter = chip.getAttribute('data-filter');
+        runFilter();
+      });
+    });
+
+    // Theme toggle
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  </script>
+</body>
+</html>

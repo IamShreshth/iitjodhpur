@@ -1,0 +1,1480 @@
+
+2_ Expert Lecture (Joydeep)_Big Data Handling
+
+Transcript
+Search transcript
+0:00
+Okay.
+0:02
+>> Yeah. So, we are all good to go. Yes.
+0:05
+>> Okay. So, uh so I'll probably start from where I left off last time. And uh last
+0:11
+time we saw uh so the title was from map produce to lakehouse. And we saw how
+0:16
+query engines uh played an important role in uh connecting those two
+0:22
+architectures. And uh we saw we we spoke a lot about um query planning how
+0:30
+different queries are planned how the joins happen how they are optimized uh
+0:36
+what's a general recipe of a query planning and then we saw adaptive query
+0:40
+optimization. So all of this is to ensure that the files that we are
+0:46
+processing the data that we are processing is efficiently shuffled and
+0:51
+distributed over the executors and we are able to process them parallelly and
+0:56
+hence reducing the processing time. uh the vantage point of today's talk is
+1:01
+something that I would I had uh I was not able to cover and I had alluded to
+1:06
+in the last slide uh which is now that we we have these directory or these
+1:12
+folders full of files park avo uh what we really concerned about is
+1:19
+nobody works with files right these are transactional systems we are working
+1:24
+with records we're working with user data right user ids and u maybe ad ids
+1:30
+or maybe you know device ids so on and so forth. So we are we are working with
+1:36
+records we are working with records which are incrementally updated because
+1:41
+um you know uh people's interests change over time uh maybe uh they're growing
+1:46
+old so their age changes various attributes which keep changing and keep
+1:50
+getting updated and then how do we make sense of such a system and how do we
+1:55
+maintain production correctness. So some of the questions that I listed here are
+1:59
+which files constitute the current table? What should a reader see during
+2:03
+the update? Can we try without duplicating logical records? Uh what
+2:09
+happens if another writer modifies your overlapping data? Can we reproduce the
+2:14
+result an analyst saw yesterday? Now all of this already points us that uh more
+2:20
+than your data being a directory of files we should also look at something
+2:25
+which can efficiently manage your data which can efficiently keep a log or an
+2:29
+audit trail of your data and that's where the lakehouse architectures or uh
+2:35
+architectures like and and there are many variants to that delta lake iceberg
+2:40
+uh there's apache hoodie and there are many others who are already in the mix
+2:44
+there's something called duck take. So all of these architectures kind of
+2:48
+converge to this transaction log uh the entire providing asset properties on top
+2:54
+of object storage this kind of architecture. So uh having said that as
+2:58
+the motivation maybe I I'll switch to today's slides. Uh so what we are really
+3:05
+trying to move towards is can we take a folder can we take a folder full of
+3:09
+files or your p files which are again worth say pabytes or terabytes of data
+3:15
+and can we build a table of sorts on top of it. Can we build a um you know
+3:21
+structure on top of it. So again like I was saying uh earlier we
+3:27
+were concerned about spark being the engine which was processing data or
+3:31
+processing the files efficiently. So you plan the query you compute an answer but
+3:35
+today the point in question will be the actual records which are within which
+3:40
+are lying within the park file. So you have say an ID uh which is just one of
+3:46
+the many records within the park file. How do I maintain certain uh
+3:50
+consistency? how do I maintain it like a transaction and still process it
+3:55
+cheaply. So that that is today's uh you know talk all about and again like like
+4:02
+the other day we would take an example a running example of sorts. So here you
+4:07
+see uh you have ID which is the user ID and then you have gender age interest
+4:14
+and interest can be of many types. people's interests keep changing right
+4:18
+some today I'm looking at news apps tomorrow I'm uh looking more on sports
+4:24
+app and then there might be I'm I'm doing some purchases for fashion apps
+4:28
+and then I'm scrolling I'm I'm my interests keep changing right so this is
+4:33
+uh these are dimensions which are slowly changing it's also called sedd slowly
+4:37
+changing dimensions so over a period of time it may not change immediately but
+4:42
+over a period of a month 6 months a year you will see probably uh different kinds
+4:47
+of data flowing into your system and you need to maintain this system of record
+4:51
+with you. So um what what are the things that can happen to it? So user one
+4:55
+changes interest. So maybe we need an update or a delete. Uh a partner or
+5:00
+somebody sends in a wrong age. You know 9 uh 9 cannot be an age but that flows
+5:06
+into the system. This table itself grows into say millions or billions of rows.
+5:10
+So you need some sort some sort of efficient way of scanning the data and
+5:16
+then uh you might want to either update the existing records or still keep
+5:21
+adding new records and finally there must be some downstream dashboard that
+5:25
+you want to maintain. So just a second. Okay. Okay. So
+5:32
+having said that now earlier when we we were using spark there could be many
+5:37
+things that could have gone wrong. You know when when a spark job ran uh maybe
+5:42
+the job uh was killed in between or the job just died and it was only able to
+5:47
+write two out of the three files. When when you do that spark read a folder
+5:52
+name right that's the syntax that we use in spark. When we do that, you don't
+5:57
+know the data that is residing in this folder is the correct data or not.
+6:01
+You'll always be in that um corridor of uncertainty, right? Uh let's say
+6:07
+somebody has deleted a file, right? There's some system, some process which
+6:12
+is running which went ahead and deleted a file from the system. It's doing
+6:15
+running some compaction job, you know, and then there are some corrupt the
+6:19
+entire file is correct and there are some corrupt rows. All of this requires
+6:24
+some uh dedicated uh central system to maintain it like a table. So the only
+6:30
+definition of the table is whatever files are in the folder right now.
+6:34
+That's that's what you get with spark. So what we ideally would want is we
+6:40
+would want to change a single row and maintain some sort of record of it
+6:45
+instead of changing the entire file. uh readers uh like uh ones who are reading
+6:52
+the files never have to see half the change. If you have written out a
+6:56
+change, it would either be committed or it would not be committed. The the
+7:01
+application which is reading it should not see half a change. Two writers
+7:06
+should not silently clobber each other. They should not override each other's
+7:10
+changes. So there's some consistency that is required and I should be able to
+7:15
+do some kind of time travel. I should be able to go back versions and look at
+7:20
+yesterday's data and figure out what was the change data. And again like in a
+7:25
+folder you have all sorts of files. We don't need to read files that we don't
+7:29
+need. So we want all of these have been provided by databases,
+7:34
+right? But data links or the cloud storage have given them up for cheap
+7:39
+storage, right? uh they they have let they had to let go of this acid property
+7:46
+uh to to gain control but then Delta Lake brings back that acid property on
+7:50
+the same file system. So we'll see how that is possible. So so
+7:58
+uh simply put what is a delta lake? It is your regular park files you know and
+8:04
+I'm saying park because that's the most commonly used format. You can use other
+8:07
+formats as well, but when you really go and check any of these lakehouse
+8:11
+formats, you'll always find park as being the default. So, it's really your
+8:15
+park files plus a log file. That's it. Uh, incidentally, here it's called delta
+8:20
+log. So, it's just a log file. And if you see these log files, it's named
+8:25
+00.json 001.json. These are literally the version files.
+8:30
+So, you can think of 00 as being the zero version, 001 as being the first
+8:35
+version. And when a reader reads it, the reader does not directly read from the
+8:41
+folder. So what happens is um when you go to S3 or GCS, right, or any of the uh
+8:47
+HDFS, right? It first calls the HDFS file system or the uh S3 file system to
+8:53
+list the objects within it, right? In this Delta Lake scenario, it does not go
+8:58
+to the um the HDFS file system or S3 or GCS. It actually goes and reads the
+9:05
+delta log files. this 00 JSON or 001 JSON constructs the state of the system
+9:11
+which files are part of the current state or part of the current delta table
+9:16
+gets those files and only reads those park files and that's where the power of
+9:21
+these uh systems come into picture and and we'll see how that is happening with
+9:27
+an example with a with a uh interactive demo kind of session but again a delta
+9:33
+lake is just your park files plus your log files where you know the log file
+9:38
+says which files are in the table right now. So we'll switch to a quick you know
+9:43
+demo and as demos would have it probably I had to reconnect this session just
+9:49
+give me a moment. Um
+9:57
+so while the code is running I'll just explain what is happening here. This is
+10:01
+the same example which I was alluding to earlier. So you have ID 1 male you know
+10:09
+25 sports ID2 female 30 new. So these these are the interest age gender and
+10:16
+the ID and all you have to do is you have to load it like a spark data frame
+10:20
+and you have to write it out in the delta format. That's it. You're done.
+10:25
+And then so I'll just run this file and I'll load it already. although I've run
+10:31
+it already. So you can see the output. But I but I really want to show the uh
+10:36
+files that appear on the left hand side. So let me go back
+10:41
+and let me go to temp because that's the directory where it's writing and if I go
+10:48
+here under profiles. Okay. So if you see here this is where
+10:55
+the park files are getting written and this is where the delta log is. So if
+11:02
+you see here this is the version file and this is the park file. This version
+11:06
+file let's let's inspect what this version file has u quickly but we'll
+11:11
+also see that uh below. So if you see here in this version file there's loads
+11:15
+of metadata loads of information about the spark file. Okay. So one of the
+11:22
+information that I would like to draw your attention to is this add
+11:26
+uh column. This is literally a column in the JSON file which says which is the
+11:31
+path what is the name of the file that has been written you know and what's the
+11:36
+size of the file uh various different data statistics you know and and then as
+11:42
+you can see here uh it also houses your various columns and what are the minimum
+11:49
+values and the maximum values in that column. So if you had if you had let's
+11:55
+say ID as one of your columns and the min value would be one and the max value
+12:00
+would be four. Similarly for age it would show that the min value would be
+12:04
+25 and the max is 35. How we will use this is something that I'll come to
+12:08
+later. But as you can see here all this metadata files are getting stored along
+12:13
+with the data simply in a folder structure. That's it. And you can also
+12:16
+run it in your local and you'll see the same structure. And and as you see here
+12:22
+uh let me run this and we can quickly see this. Uh so this is what I was
+12:29
+talking about the delta log file got written and then your data file got
+12:32
+written. So this is part of what got written to disk. And then this is this
+12:37
+is the schema or the structure of that.json
+12:40
+file here which I was showing. So you have something called an add column
+12:45
+which literally tells you that this file was added the this file and the records
+12:50
+within this file was added as part of delta le and then you have some
+12:54
+statistics which I was talking about the minimum value of the column and the
+12:57
+maximum value of the column and then there is null counts like how many nulls
+13:01
+are there in this column in this file. So it stores file level statistics. Then
+13:06
+there is all sorts of metadata configurations
+13:10
+uh partition columns so on and so forth. Uh and then let me uh and and and as you
+13:16
+can see here also put the min and the max values which I was talking about. So
+13:23
+you have the park file and then you have for uh for gender probably does not make
+13:28
+sense but then makes sense for ID or some numeric columns right? what's the
+13:31
+max values and what's the min values and finally we are and and if you see here
+13:36
+now let me so I I'll explain the uh what's happening under the hood later
+13:42
+but let me draw your attention to the syntax here uh know we want to update uh
+13:48
+this particular record which has sport ID1 which has sports we want to update
+13:54
+that to news right and the syntax is as simple as you just say you have already
+14:00
+loaded this table and you just say update where you put the ID as one and
+14:05
+you say interest should be updated to news and at this point what happens is
+14:10
+what you see is a very coherent view you know but let me let me run this actually
+14:16
+and and show it what happens on the left hand side is
+14:21
+interesting so I'm running this and as I run this
+14:27
+ideally the what you see here uh is just that record getting updated. But what
+14:33
+will appear here is a new version JSON and a new park file.
+14:39
+So if you see here uh this particular record which had sport got updated and
+14:49
+let me okay
+14:59
+I think uh It's taking some time. Okay, got it. So if you see here now,
+15:05
+earlier when there was 0.json, you just had one parket file. Now a new park file
+15:10
+has appeared and your 001 JSON has appeared. Okay, this is a new version.
+15:16
+So every update that you do, it can be just at at one record level, but these
+15:21
+are really systems designed for, you know, millions and billions of record
+15:25
+updates at one time. So you would probably have all your data your old
+15:30
+files these old files will be marked for delete and the new files will be marked
+15:35
+for so so let's look at let's inspect this once again. So if you see here in
+15:41
+add you have this py file the old park file uh 14 C 0 C triple0 this is say it
+15:50
+is saying that add this and this other one BD2 C0 it has marked it to remove.
+15:56
+So what it has really done is it has taken the data which was available in
+16:00
+this file rewrote that entire file with this new row you know updating this
+16:05
+entire file which had all of this data updating this with this new uh news
+16:12
+update and it has marked the old file for remove and the new file for add. So
+16:18
+what this means is when you now load the delta table what you see which which I
+16:23
+have really done here it will first go and look at 0.json and look at 1.json it
+16:29
+will reconstruct the state at the final level it will understand that it does
+16:33
+not so at this point it's not reading any paret file it's not doing your uh
+16:38
+scan and pulling all the data in memory it's just pulling these lightweight JSON
+16:43
+files it's looking at 0.json JSON and it recognizes that hey this file I need to
+16:48
+read but immediately in 1.json it recognizes that this file has been
+16:52
+marked for delete and this has been added. So this is the most consistent
+16:55
+state of the system right now and this must house the latest table data and
+17:00
+that's how it just loads this file and presents you this data and that's what
+17:05
+you can really see here uh which is which is uh which is these files and if
+17:11
+you see there's also let me close this in this demo you also have you know what
+17:15
+files are there on disk and what was written inside the table so it's just a
+17:19
+illustration of what I was explaining so there are two files on disk two spark
+17:23
+files on this. But in the table right now, the current version of the table
+17:27
+houses this park, right? And and then again that same data which is what was
+17:33
+added and what was removed. As simple as that. And now when you see the schema of
+17:39
+this new JSON file earlier, the 0.json is really a bit special because this is
+17:45
+the first time you're creating a delta table. There's nothing to delete there
+17:48
+really. You're just adding stuff. You're just adding new data, right? But with
+17:52
+with the next version, next consequent versions, you start removing data
+17:57
+because you would probably be either doing an insert or you would be doing an
+18:01
+update or a delete, right? So you would start adding more and more uh these
+18:07
+remove data and start adding both to remove and add you know the the columns.
+18:12
+And then there are other file level statistics which are calculated like
+18:16
+what was the time uh that that this entire uh processing took what was the
+18:21
+scan time so on and so forth you know how many new rows were added you know if
+18:25
+you see here how many files were added it was just one file how many rows were
+18:29
+copied remember we just changed one row and there were four rows in that uh park
+18:33
+file so what it is saying is the other three rows were just copied you know
+18:37
+they were just copied from the old data there was only one row which was updated
+18:41
+which is num updated updated rows. So there's only one row which is really
+18:44
+updated. So all of these statistics is actually stored along with the data and
+18:49
+yeah and and then a simple uh you know somebody might start writing data. So if
+18:54
+some other process is writing data to that folder uh we don't really need to
+18:59
+worry about it because even if it if you see this stray park file got written
+19:03
+here and but when whenever you read with delta it will not even consider this
+19:08
+stray par because its system of record is are these uh zero and 01 and 0 0 JSON
+19:15
+files right so this is where all your state all your metadata is written it
+19:19
+reads that to understand what's part of the table and what's not. So if this is
+19:24
+not logged in one of these JSON files, it's just uh you know does not read this
+19:28
+data and then some your compaction or your vacuum job will anyways delete it
+19:32
+later. No. And then finally just to uh for completion we'll also see the delete
+19:37
+syntax. So we're trying to delete ID3 and as soon as I you know and syntax is
+19:43
+very straightforward table.delete and you just put id equal to three. The
+19:47
+point here is as soon as I press delete, one would reckon that delete would
+19:52
+probably delete something. But everything within Delta Lake is a new
+19:56
+file addition. And again, there are arguments to why we do this. But the
+20:02
+point is and and we'll cover that in in this uh in this session. But the point
+20:07
+is even a delete as you can see this new file got written and now it does not
+20:12
+have the ID3. It just has the three records. Right? So now again when
+20:17
+somebody reads the delta table it tries to reason through these JSON files
+20:22
+what's the current state of the system and it figures out from here if I open
+20:26
+you know uh table two or JSON 2 you will see that you know other files have been
+20:32
+added for removal if you see here and the new file has been added here so it's
+20:37
+very intuitive in that sense that you can reconstruct the state by just
+20:41
+reading these JSONs you know and that's what we're trying to show here that
+20:44
+there are many files on disk Even uh you know I've not deleted the
+20:48
+stray file. So the stray file is also on disk. But what you see as the table's
+20:52
+current state is this spark a file. And finally uh this is just the table's
+20:56
+history where we try to show what happened throughout you know first a
+20:59
+right then an update and then a delete. This is just for you know a visual
+21:03
+intuition as to when we say we are updating a table, we are deleting stuff
+21:08
+from a table, we are inserting stuff to a table, you know columns uh sorry rows
+21:12
+to a table, what does it mean physically? So this is that intuition
+21:16
+and while I'm on it I'll also like to cover one more a small part of it and
+21:21
+which is basically um you know now now that these JSONs are present there's
+21:28
+already you can see there's a notion of um let's say a version coming into
+21:33
+picture you have various kinds of data points which you would like to go back
+21:39
+in time right uh when I say back in time what it really means is you want to go
+21:43
+back in version you want to see what changed between version zero and version
+21:47
+one what changed between version one and version two so that is the kind of
+21:51
+difference or the change data that you would want to read and let me uh so so
+21:58
+when I was saying that maybe one of your record is corrupted and I will not run
+22:02
+this notebook I've already run it and kept it here and if you see here uh the
+22:06
+initial data was like this you know and there was some erroneous data that was
+22:11
+uh sent by this system by some process which updated the age to triple 9 and
+22:16
+now your how it happened was first there was a right then there was an update and
+22:21
+then there was an update right because your initial data was somewhere and then
+22:25
+it got updated but now you want to delete that all you can do is instead of
+22:30
+deleting instead of deleting you you can't figure out in the data what what
+22:34
+got corrupted right there might be uh you know let's let's consider this is a
+22:38
+corrupt record there might be millions of such corrupt record that can come
+22:41
+into your system so that means a part of your data is already corrupted. So you
+22:45
+got to revert to a previous version right and that's what we are alluding to
+22:49
+that you can easily say that you know there are various kinds of syntax for
+22:53
+that but what you can easily do is there's also a SQL syntax you can say
+22:57
+you know version as of one let's restore to that version so you can directly say
+23:01
+table restore to that version and you just your table gets rewritten to the
+23:06
+previous version and this even this restoring to a version is not really
+23:11
+deleting anything it what it does is it takes that version's data and again this
+23:16
+is this is a picture of that really. So your table now after the restore is at a
+23:21
+previous version is at a at v1 and v2 was the corrupt version. If you see your
+23:27
+table now says that this is the parket that should be used you know and that is
+23:32
+again controlled through the uh JSON file which has your add data has this
+23:38
+particular park and the remove probably has the v2 park. So it says remove this
+23:42
+park because whatever the reason in this case it was corrupted but remove this
+23:46
+park and add this parket back which was available in the uh you know pre v1 uh
+23:52
+dojson let's let's call it that okay so so yeah this is one other feature that I
+23:58
+wanted to show and there are various constraints and stuff you can also put
+24:01
+rules and validations like you can add constraints like this you know like for
+24:06
+age we knew that age can't go beyond let's say zero and 100 so we put a
+24:10
+constraint check and then whenever somebody wants to update the table with
+24:13
+a you know arbitrary H it would just throw a um delta validation error you
+24:19
+know that this this change can't take place. So, so let's move on to our
+24:26
+slides. Back to our slides. Sorry.
+24:31
+Okay. So, what did we see till now? Uh, so what we saw is uh what the log gave
+24:37
+us is a lot of control over the data, the records, the transactions that were
+24:42
+happening in the system. We saw that there is this notion of 001.json
+24:47
+002.json. just u increases uh monotonically or sequentially. So we see
+24:54
+that there is this concept of a remove where you can add paret files and
+24:59
+there's this concept of add where you can uh sorry there's this concept of
+25:03
+remove where you you where you mark previous previously written park files
+25:08
+as being deleted and then there is these add columns where you can mark newly
+25:12
+written park files but at the core of the system are new files getting
+25:16
+written. You never touch your old files. Okay. So this is what we saw again the
+25:23
+stray file example any arbitrary file getting written to a folder would not be
+25:28
+considered because your delta log is your system of record. And finally we
+25:34
+also saw this notion which I was trying to showcase that you can revert back to
+25:38
+a version. You have various versions available. You can choose between
+25:43
+versions. You can do time travel between versions. And finally we also uh you
+25:48
+know saw a glimpse of this min and max stat on every ad. So that means when a
+25:54
+file gets added at a file level within a file at a column level there is this uh
+26:00
+min minimum id and maximum ID or maybe some other numeric column where the min
+26:06
+values and the max values are getting stored.
+26:09
+Okay. So that being said, now we'll look at uh how so we've established that this
+26:17
+is this weird set of system where instead of you know deleting data or
+26:23
+doing um uh say modifications in place. We have we have uh established this
+26:29
+elaborate system of transaction logs and rewriting files with updates with
+26:34
+deletes and everything. But why such an elaborate system? what are we really
+26:39
+gaining using that right so let me
+26:45
+uh go to the next slide for that which is really uh multi- version concurrency
+26:51
+control uh so multi- version concurrency control
+26:55
+I think probably you would have read about it but how as you can already see
+27:01
+we already have this notion of multiple versions right all we need to do is now
+27:07
+maintain ain some kind of consistency between them. So if you see there is a
+27:11
+reader in this case a special reader called delta table reader. You would
+27:15
+probably have your spark data frame reader and you may have heard about
+27:18
+them. Now you you have these delta table
+27:23
+readers which would read your park files right and when I say read it always
+27:28
+reads data at a certain version right I may have read I I am at version 00.json
+27:35
+or 001.json JSON. This is the version I have read and remember none of its park
+27:41
+files are getting deleted. So I always know when I'm at version one, nobody's
+27:45
+going to touch the park files associated with it. There might be some other
+27:49
+reader there's already a version two that has been written after I have read
+27:53
+version one but there is nobody who's going to touch version one files. Okay.
+27:59
+Uh just a second. Is there a lot of disturbance from the background?
+28:06
+No.
+28:09
+>> Okay. All right. So, so having said that, so
+28:16
+now that a reader has read these a particular versions files, uh, and this
+28:23
+particular reader will now try to write new records. It it can only do one of
+28:28
+these few operations that you see listed here, right? It has read the current
+28:33
+version. Say suppose we are at version one and now it can insert new rows. It
+28:38
+can update you know uh existing rows which means it will it already has a
+28:44
+copy of your old files and it is making some uh changes at the row level. It's
+28:48
+updating some record or it has read your old rows and it's deleting something
+28:54
+out. It's leaving something out. Right? So it can really do and then and then
+28:58
+compaction is really there are many small files many small small park files.
+29:02
+is just combining them into one large file because it's just efficient to read
+29:06
+that in memory. So all of this it it it can do all of these changes and stage it
+29:14
+in again in the same folder structure. In this case when I say folder
+29:17
+understand I'm talking about object storage I'm talking about HDFS Google
+29:21
+cloud storage uh Amazon S3 so on and so forth but it has housed all your changes
+29:26
+at this point it will perform a validation and then only it will perform
+29:31
+a commit. What do I mean by validation? It has read 001.json.
+29:37
+It has now made some changes in uh you know part B, right? And it has also add
+29:46
+uh let's say it has made some changes in part B. So it has it is saying that hey
+29:50
+let me remove part B and let me add a new file you know which may be part C or
+29:56
+or in this case what it is saying is it has made a change to part A. So as you
+30:00
+see sports this first record in part A has been updated. So what it really
+30:06
+needs to do is it needs to mark this file for a remove and add this file
+30:11
+right but at this point it goes and tries to do a validation. So what is
+30:16
+this validation? And because after that only it can commit 002.json in that
+30:21
+002.json it would probably have these items available but it can only do after
+30:26
+the validation. So what is this validation? It's a very simple system
+30:30
+which you have already studied I think extensively in your uh various courses
+30:35
+or or it's called optimistic concurrency control which is basically you do not
+30:41
+lock the rows pessimistically which means you do not uh why when you lock
+30:46
+the rows nobody else can read it that's not the case any reader can read a
+30:50
+particular version and then it it probably has these staged new files
+30:55
+which I was talking about and then it tries to create let's say the next
+30:59
+version JSON in the previous case it was 002.json in this case let's say both of
+31:04
+these writers have read version two they have they have made their changes in
+31:09
+various you know files and now now they're ready to write version three
+31:13
+3.json JSON. Okay. Now, one of them will succeed because one of them is going to
+31:19
+write it first. The other one which is let's say this writer B is actually
+31:25
+going to go and see if 3.json is already taken. Okay, it will ask the file system
+31:31
+is 3.json already present there. The file system will either say yes or no.
+31:36
+If the file system says uh you know if the file system says yes then it will
+31:43
+try to read 3.json and figure out that the the the rights that 3.json has
+31:50
+performed. So let me let me explain with an example here. So let's say uh the
+31:56
+writer is writing a part C which has no conflict with part A. It's completely
+32:00
+writing new records but the idea is it's trying to write 003.json. JSON. So it
+32:07
+comes back, it tries to check that whether 3.json is there or not. In this
+32:12
+example, it sees oh 3.json is there. Then it will try and go and check uh try
+32:17
+to go and check that whether 3.json has any changes to the files that it is
+32:24
+concerned with. Let's say it is concerned with part C. So it sees that
+32:28
+okay the previous version the 3.json JSON version has actually removed part A
+32:33
+and re uh added part B but I am working with part C. If that is the case if that
+32:39
+succeeds then it will immediately go and commit 4.json you know which is the next
+32:44
+version you know in line 3.json 4.json because it understood that this is this
+32:49
+is like concurrency for you because the pre other writer was working with some
+32:54
+other file which this guy was not touching and because this guy had
+32:58
+nothing to do with it. it just went ahead and wrote 4.json. But if it
+33:03
+figures out that the other writer is also working with part C, let's say, uh
+33:09
+then it will throw a concurrent modification exception. It will that job
+33:14
+will simply fail. It will not try to again do some other logic and try to
+33:17
+figure out because then it will be an infinite loop. It will keep on trying to
+33:21
+figure out and the by and by the time it tries to figure out somebody else might
+33:24
+have written a four.json and a five.json. So at this point it just sees
+33:29
+that okay there has been changes to the files that I am working with and it just
+33:33
+fails immediately. So there is literally no locks locking mechanism here. You
+33:38
+know everybody reads and maintains one consistent state of the version and
+33:43
+tries to commit based on tries to commit optimistically. In this case for the
+33:48
+readers it's quite easy. It's quite transparent. Let's say two read writer
+33:53
+I've already explained it tries to you know uh write part B. But for reader
+33:58
+let's say a reader is working has read version one of v1 which is a park file
+34:05
+and now it tries to do it tries to do operations on top of it. Remember reader
+34:09
+cannot write right. So it tries to do some calculation some metric
+34:13
+calculations some analytical job on top of it while reader Y at has read at this
+34:19
+point where already the you know the new version has been written. So it's okay
+34:24
+reader Y can now read the next version and work with it. So the idea is every
+34:29
+reader either reads v_sub_1 or v_sub_2 one complete version nothing in between
+34:35
+while this guy is writing reader x will not be able to read that and that's
+34:40
+absolutely consistent right because if these changes were made in place if the
+34:46
+files were not duplicated if the park files were not rewritten then while
+34:51
+reader x was working with para has just read it you know somebody would have
+34:55
+modified it and then there would be all sort sorts of inconsistencies in place.
+34:58
+So this is like a classical architecture that uh you know anybody doing MVCC and
+35:03
+optimistic control follows and then we try to write to that particular uh you
+35:08
+know um file right so yeah so just um let me quickly do a demo of this and
+35:17
+I've actually created a race condition uh for a demo so let me see if u this
+35:24
+guy is going to allow me or not. So, so if you see here, so I'll just quickly
+35:29
+show because I've already run this. So, what I'm trying to do here is u this is
+35:33
+a data frame. Same data frame. Uh as you see, id1 male 25 sports the same data
+35:39
+frame first I've written it and now there are two competing jobs you know
+35:43
+two jobs which are working with two different records you know and and we've
+35:48
+written it in a way so that they are different files. So when these two guys
+35:53
+were trying to write you know both of them succeeded both A and B both these
+35:58
+jobs succeeded while there are when there are competing
+36:03
+let's say uh jobs so this guy is trying to update one with an interest and this
+36:08
+guy is trying to update two with an interest they're probably working with
+36:12
+the same file. So the first one commits but the second one figures out while it
+36:17
+was going to commit that there is some sort of you know conflict this guy has
+36:22
+already changed the file which I have also changed and hence it throws a
+36:25
+concurrent append exception. So so that is uh that is the idea behind these
+36:32
+modification exceptions that once when one is working with it the other cannot
+36:36
+uh work with it. Okay. All right. uh
+36:43
+let me so this is again that same thing which I was talking about can we see the
+36:47
+table as it was before can we uh you know stop it stop some corruption from
+36:52
+happening can we undo it which is basically switching to a version so I
+36:56
+just showed this notebook at the beginning itself so finally what am I
+37:00
+getting at really it's really this asset properties so till now whatever I have
+37:05
+spoken about this transaction logs this entire system it's not just the
+37:09
+transaction log This entire system of copying files, maintaining this
+37:15
+transaction logs, either a version file getting written or nothing gets written.
+37:19
+All of this points us to asset, right? So if you see uh atomicity either the
+37:25
+entire commit succeeds or none of it, right? No reader sees a half sees a
+37:28
+halfbaked version, right? Same for consistency, right? All of these are
+37:32
+intertwined in many ways, right? uh there cannot be any conflicting rights
+37:36
+like you saw in this example there was a concurrent modification or a concurrent
+37:40
+append exception when another writer was trying to write to the same file when
+37:44
+somebody had written right so there is this notion of consistency baked in uh
+37:49
+then there was also this snapshot isolation right a reader was reading its
+37:53
+own version and working with it some other writer when it was writing it was
+37:56
+ordering those version if it if v2 was already there it would read that and
+38:00
+then only write v3 right and then finally uh durability which is basically
+38:06
+you're writing all of these.json JSON files there is only one winner when many
+38:11
+concurrent um jobs are trying to write there is only one winner and the loser
+38:15
+just has to like rerun the job it cannot overwrite what the winner wrote it
+38:20
+otherwise there would be huge inconsistency and finally the cloud
+38:24
+storage uh let's say HDFS or S3 also provides certain durability guarantees
+38:29
+through this mechanism it is able to transfer those advantages to the delta
+38:34
+lake users as well you know whoever are running these S so
+38:41
+okay so we've covered asset we have covered the general architecture of how
+38:46
+delta lake tables look like uh I think uh the next topic that I want to cover
+38:51
+which is very important like we've been talking about efficient uh you know
+38:56
+files uh efficient scanning of data how can we filter we have spoken about
+39:00
+projections right push down predicates in the previous talk how can we push
+39:05
+down these uh filter condition so that least amount of data is pulled into
+39:10
+memory. Right? But the problem was with Spark there is no principled way of
+39:14
+doing it. You can do you have this adaptive query execution which changes
+39:19
+join strategies mid job by intermediately calculating statistics
+39:23
+but there was no central way of doing it. So Delta Lake and such formats like
+39:28
+iceberg came up with these strategies for efficient scanning of data for
+39:33
+efficient merging of data and uh that is where the next topic is around data
+39:39
+skipping and merge. So what do I mean by data skipping? Let me let me talk about
+39:44
+this and why I specifically pointed out that minmax is because let's say you
+39:49
+have run a query where you're looking for this id 750.
+39:56
+Now you this is not a uh let's say a kv store where you have of one operations
+40:02
+available right probabistically. So you cannot just directly query with an ID
+40:06
+and get back the record. This is a painstaking distributed file system
+40:12
+where you have to scan and painfully go through all the records to find this ID.
+40:16
+This literally fails when you have such use cases. Let's say uh you you got an
+40:23
+update where you just have to update one ID. Then it becomes like like you're
+40:27
+you're literally finding a cannon to like like it's it's a search like a
+40:32
+needle in a haststack problem, right? So when you have these kind of ids
+40:37
+available uh or these kind of uh statistics available as you can see for
+40:42
+file A you know for the ID column it houses between the min ID is one and the
+40:47
+max ID is 100 so you can safely skip this file you don't need to load this
+40:51
+file in memory for B you know the lowest the minimum value for this ID column is
+40:57
+101 and the max value is 200 so you can simply skip this um file as well for
+41:03
+file See you know it houses ID 7001 and between ID 7001 and 800. Now it it
+41:11
+may not be all these ids but the because you have just sorted them and taken the
+41:16
+min and the max right you know what's the lowest nothing can go below this
+41:21
+that does not necessarily mean that you'll have everything from 7001 to 800
+41:24
+within this park file but definitely the lowest number is 7001 and the highest is
+41:29
+800. So you can safely pull this file into memory and then scan this file go
+41:35
+record by record one by one to figure out whether this ID is there in that
+41:38
+file or not which is still much better than pulling the entire data into
+41:42
+memory. Right? And all of this is done just by reading the lightweight JSON
+41:47
+files, the log files. Okay, so that's the intuition behind it. And this I have
+41:51
+just I've just given one more illustration where if you see this is a
+41:55
+this is a weird case where you know let's say you have ids between 0 and
+41:59
+16,000. And somehow all these ids now this is a this is a case where sorting
+42:06
+or ordering your data or clustering your data would help. But just to show a
+42:10
+problem with this kind of uh uh layout as well. The best case is this right?
+42:16
+You skip most of the files. But then in in most scenarios what would happen is
+42:21
+you would not have your data sorted and then you know a lot of these files will
+42:26
+have possibility as you can see here uh eight files because of the min and the
+42:30
+max value that they contain which is very near to say 16,000 and very close
+42:35
+you know very close to zero or less than 750 all of them have a possibility of
+42:40
+housing this 750 ID right so all of this would be read into memory and then we'd
+42:45
+have to sift through them But however, if you are able to order the data, if
+42:50
+you're able to sort the data, cluster the data very evenly and if these are
+42:54
+non-over overlapping boundaries, what you easily get is you would exactly know
+42:59
+that if the data is sorted or clustered, uh you you exactly know that this uh 750
+43:05
+ID falls in this file because you know the data is clustered. So it would you
+43:08
+can safely uh and and that would also reflect in the min and max values. You
+43:12
+can safely skip all the other files. So this is one of the you know advantages
+43:18
+of uh really sorting or clustering your data. But having said that the data
+43:22
+skipping advantages generally what we have seen is with randomized data even
+43:27
+the data skipping gives a lot of advantages.
+43:31
+So so it's just uh the same thing. Now now moving to let's say your merge uh
+43:38
+operation. So what is a merge operation? A merge operation is really you know
+43:42
+update and insert operation uh clubbed into one. So that's what I'm trying to
+43:47
+showcase here. So this in table is your delta table where you have the master
+43:52
+records like let's say these three park files are there. they house these three
+43:57
+ids you know sorry these these uh ids they house each park file and you might
+44:03
+want to you know 150 is an update and 175 is a insert so it's a completely new
+44:10
+insert that is happening right and rest you don't want to touch them right so
+44:15
+ideally what you would want to do is uh you just want to touch this uh park file
+44:21
+a file name a and then rest you don't want to touch and then you want to
+44:25
+create a new file uh which is like say d.park with this 175 this record. Okay.
+44:31
+So how do we achieve that using merge? So if you see here this is where the
+44:37
+entire system uh uh you know really uh comes together where we use the data
+44:44
+skipping we use various kinds of joints to figure out how a merge operation can
+44:50
+be uh performed. Okay. And what I want to also highlight here is so starting of
+44:58
+this course you have read about map reduce and then you have read about how
+45:01
+group buys can be performed using map reduce. You might have heard about
+45:04
+reduce sight joints. Uh you know where you have a bloom filter reduce sight
+45:08
+join and then you push all your data towards it and based on those uh
+45:13
+constructs higher level operations like joins just based on mapper and reducer
+45:18
+higher level constructs like joins and bloom filter joins and so on and so
+45:22
+forth were built. What you would probably appreciate is now join becomes
+45:27
+a lower level construct and you're doing this highlevel database kind of
+45:32
+operations relational database kind of operations which are really these merges
+45:36
+where you try to do update insert and delete. you know, you uh you just get a
+45:41
+you have a big table, a a huge system of records and you're getting these small
+45:47
+batch updates data where you have let's say you have a 1 billion record table
+45:52
+and you're getting 10 bill 10 million updates every hour. And now you don't
+45:58
+need to actually figure out by joining like what are the candidates for insert
+46:01
+and what are the candidates for update. You can just simply call this merge
+46:06
+operation and it will figure it out for you. The merge operation figures are
+46:10
+this mechanics for you. How it does is where both data skipping and various
+46:15
+joins are put into uh you know uh put into play. So if you see here first what
+46:20
+it does is first the as as usual your source files your merge files will have
+46:26
+certain joins applicable. So uh I'm sorry your merge files will have certain
+46:32
+uh data skipping applicable. So first it checks what are the what are the source
+46:37
+ids that you want to update. So it checks okay you want to do 150 and 175
+46:42
+right. So it starts checking using your data skipping which files house 150 and
+46:48
+175. So it figures out that hey maybe A and B house this. This is
+46:54
+because of they are not sorted. So they are just randomly you know they have the
+46:57
+min and max values. So these two are the possible candidates. immediately C is
+47:01
+ruled out and then when it starts and at this point it does an inner join with
+47:06
+the data. So when it does an inner join with the data, this is when it actually
+47:11
+figures out that B is again not a candidate. And as you can see this inner
+47:15
+join although it may look like it's a costly operation because the data
+47:20
+skipping at scale has already been into picture the data that is actually pulled
+47:25
+into memory and actually put through a join is basically to figure out which
+47:31
+are the files that need to actually go into the update. Okay, so I'll repeat
+47:36
+myself. You started with A, B, and C files.
+47:39
+Through data skipping, you figure out A and B are the candidates. But you're
+47:43
+still not sure whether it's A or it's B. Where does this 150 record lie? So now
+47:48
+you intelligently do a join with on ID that hey, the source data 150, let me do
+47:54
+a join. Once you did a join, you exactly figured out that A houses this record
+47:59
+and the and this other record 175, it did not find a match in B or A. So you
+48:05
+know it's definitely that it's a insert record. So you are immediately from your
+48:11
+insert data from your batch data which is on this right hand side you're able
+48:15
+to figure out this is a join candidate for an update this is a candidate for an
+48:19
+insert and more so for an update this is present in file A. Now you perform a
+48:27
+full outer join right a full outer join at times they perform a right outer join
+48:32
+ideally it's it's just an outer join let's put it that way when you perform
+48:36
+this outer join the now think about this expand this ABC files to thousands of p
+48:43
+files with billions of rows you know PBS of data let's say right all of this
+48:49
+getting pulled into memory versus this efficient data skipping happening a join
+48:54
+a small join happening you know to figure out which are the files finally
+48:59
+that would be written and then this full outer join happens and then the final
+49:03
+files get written. So what happens is the final commit log would have hey
+49:07
+remove A add a new B and C you know so A gets rewritten uh as a new file and and
+49:16
+and you just uh you just uh add a new file there and and sorry B and C are
+49:21
+never rewritten which means they're just skipped basically right all of this is
+49:25
+achieved because of this data skipping inner join and full outer join okay so
+49:32
+so let me let me see if there is time. Uh
+49:36
+I'll quickly
+49:40
+>> we just have almost five six minutes maybe.
+49:44
+>> Yes. So what I'll do is uh ma'am I have uh put whatever I wanted to cover. I
+49:50
+knew probably this would not have we not get enough time. So I've listed
+49:54
+everything in this PDF and I'll share the
+49:56
+>> uh notebooks as well. If you just run this uh once or twice you'll get the
+50:02
+intuition of it. So let me quickly go to this file. I've
+50:09
+already run it. So you can just follow through. So if you see here uh what I'm
+50:14
+trying to showcase is the file skipping part where there are 16,000 users. A
+50:19
+range has been taken. They have been uniformly divided into eight partitions
+50:23
+and they have been repartitioned by range which is basically they've been
+50:27
+divided in a particular format in various ranges. And then finally uh what
+50:33
+I'm trying to show here is uh what's the min ID and the max id you know all of
+50:38
+this has you know overlapping partitions. So the the point that I was
+50:42
+trying to make in the slide these have very much overlapping partitions. So an
+50:46
+ID 750 would qualify for all of them because all if you see this is 0 979 1
+50:53
+998 all of this would qualify for 750. However, this is sorted data. You know,
+50:59
+you have various other uh various ways of clustering and sorting the data which
+51:04
+would actually ensure that the data skipping advantage is taken. No. So,
+51:08
+this is one and finally the merge logic which I was trying to explain which is
+51:13
+basically first applying the data skipping and then uh you know uh doing
+51:19
+the inner join and showing the full outer join. So, if you just run this uh
+51:23
+you'll be able to you know follow through basically. So you have the inner
+51:26
+join first. what records that a which got qualified for uh you know ID 150 and
+51:33
+then when you how does the full outer join happen and then this is the real
+51:37
+merge operation which you can directly run and all of this what I was showing
+51:42
+the skip the inner join and the full outer join would happen like a DSL like
+51:47
+a domain specific language as if this is a higher level construct still does join
+51:51
+still does a lot of efficient operations but you just get a highle abstraction on
+51:55
+top of it so this is probably something that I wanted to u you know uh touch
+52:02
+upon and then there are other um items which probably we can't cover today but
+52:07
+then there is as you can see there are versions so definitely there is a
+52:11
+concept of change data right you if there are versions you can go back in
+52:16
+time and calculate what was the change data right if two records got updated
+52:20
+you can actually calculate what was the change data between these two versions
+52:23
+so what the what the uh Delta Lake people decided was why not write this
+52:29
+down as a separate data frame. So now you have a separate data frame which
+52:33
+writes something like okay in the pre version of this data it was sports and
+52:37
+in the post version it's news. So this is also written out as a data frame and
+52:41
+let's say I'll give you I'll motivate an example for this. Let's say you have 1
+52:45
+billion records and you uh between two versions only five records were changed.
+52:51
+Now, if you were to read both of these data sets and try to figure out what's
+52:55
+the difference between them, you would just be doing a huge shuffle for
+52:59
+nothing, you do a join or something. Instead, if you were to just write these
+53:03
+five records out as a change data that this was the pre-image and this is the
+53:07
+post image. If your downstream pipeline is consuming that, then it's just easier
+53:11
+for you to just read those 10 records and move on, right? instead of like
+53:14
+doing these huge joins between um very big uh delta tables or two different
+53:19
+versions of delta tables. So, so yeah, that's what I wanted to cover and
+53:25
+probably I'll share this slide and and then we can um okay, I was not actually
+53:31
+sharing sharing the wrong uh window. So, so this is what I meant by pre-image and
+53:37
+post image that the change data feed consists of this
+53:44
+So yeah so uh I think ma'am uh we can stop here.
+53:50
+It was it was wonderful joy deep and actually uh it brought together
+53:56
+everything that we've been doing uh for the past few weeks in a way because
+54:00
+we've talked about MBCC and if the class remembers I had shown a slide where
+54:05
+there were three processes and across time they were changing data and then
+54:10
+there was this uh beautiful flow graph which actually uh Jep kind of run and
+54:16
+showed how it worked And u then we were talking about
+54:20
+snapshot isolation as well. How the joins work and how it works for big data
+54:26
+problems. Something that almost I think every quiz and every exam I've been
+54:32
+killing the students with join questions.
+54:37
+So it kind of beautifully came together in today's uh session. I hope um it
+54:45
+helps the class and u yeah it was it was wonderful.
+54:51
+Do we have like maybe five minutes if anybody has any questions?
+54:56
+>> Yes absolutely I have
+54:59
+>> five minutes maybe
+55:00
+>> and I would share the slides and the notebooks as well for you to like
+55:04
+because I was just running through it but you can run it and see all all of
+55:07
+that I have logged in. In fact, that that is a wonderful exercise. anybody if
+55:13
+you have any questions cuz
+55:21
+okay so it seems people figured out what you were trying to say and um I think um
+55:29
+yeah so and this can go on because this is such a fast evolving area and data
+55:37
+it's just growing and we have such a lot of data to really handle and Yes,
+55:42
+actually I was wanting to cover there's a lot more to this change data feed
+55:47
+delta ve uh there's something called deletion vectors
+55:50
+>> there's so many things which which may look like features of delta lake but
+55:54
+they are really concepts from distributed systems which have been
+55:58
+converted to features and now it's just available at a call so wanted to cover
+56:02
+but then it's just too much for one session
+56:05
+>> too much and for example we also have okay there's a question by gut Yes,
+56:12
+>> he says and then how insert ID 175 takes place in A and not in B.
+56:18
+>> Yes, thank you for that question. So I'll quickly share that slide again and
+56:25
+um so I think uh I think this is probably uh you know for for merge this
+56:31
+is not very you know um you'll not find it very well defined in the literature.
+56:36
+They'll just say okay there are two joins that happens that's it and they'll
+56:40
+not clearly mention why these joins how do you figure out that um about so so
+56:48
+your question is about 175 which is the new record right so once you do this
+56:52
+join so we have successfully figured out that C is not a candidate because
+56:57
+because of the minmax values so you know that 150 would reside in these two at
+57:03
+this point itself you would know that 175 would not be part of any of these
+57:09
+files because you would not find it in the min and max because 175 is the new
+57:14
+record. If you remember this is the new record that we're trying to insert and
+57:18
+150 is the update. So 150 has to reside because you have min and max values for
+57:24
+ID column in every uh you know for every park file in the metadata in the JSON
+57:28
+file. So you would know for sure that 150 resides in them and 175 does not
+57:34
+reside in any of them. So you don't even need to wait for the inner join to
+57:38
+happen. Even before that you are completely sure what are the insert
+57:42
+candidates. Now for update candidates this inner join is applicable. So there
+57:48
+is something called if I'm not I'm forgetting the name it's called insert
+57:52
+merge join where everything is an insert. So you completely skip the inner
+57:56
+join because you figure out that everything qualifies for an insert based
+58:01
+on these minmax statistics and then the inner join does not happen that is
+58:05
+skipped and only the full outer join happens. So that is one more
+58:08
+optimization on top of merge uh which is basically you just figure out what are
+58:13
+the insert candidates based on this minmax statistics. So, so if that answer
+58:18
+your question
+58:21
+>> and here I believe we are assuming clustered sorted data
+58:26
+>> not necessarily necessarily
+58:28
+>> we we are saying if it's sorted it's best I mean there's nothing like it but
+58:32
+even if it's not sorted that's why this case where you have both A and B it's
+58:36
+not sorted both of them are overlapping so you don't know whether it is
+58:40
+definitely in A or in B
+58:42
+>> if the data is sorted and the delta lake would keep a record of that as well if
+58:46
+the data is sorted then it would not even look at B. It would immediately
+58:49
+pick up A. But now it knows that it has been some time since the data has been
+58:53
+sorted. My candidates are A and B. Let me now do the inner join to figure that
+58:59
+piece out basically. Okay. Any other questions?
+59:23
+says
+59:26
+>> 115 because the minmax values are there now.
+59:33
+>> Okay, I probably I'll been sifting through it quite quickly. So, so let's
+59:40
+look at this guy here. Uh so if you see this file a and and this is part of the
+59:46
+metadata JSON so if I were to show you uh it's part of this JSON so if I if I
+59:53
+uh show you one of I think I have uh shown this somewhere
+59:58
+uh let's see yeah here so you see min values this is this is a par file right
+1:00:05
+this is one of these park files C 0 BD2 this one it is saying that For the min
+1:00:12
+value for ID column is one for gender column means nothing for string probably
+1:00:17
+lexographically sorted female for age it's 25 and for interest it's fashion
+1:00:24
+whatever that means right and the max values for ID is four you look at the
+1:00:28
+record here the min value is one and the max value is four this is stored at this
+1:00:35
+uh JSON level so you don't really need to look at the data instead you can read
+1:00:40
+the JSON and figure out does this ID 150 lie within this park file because the
+1:00:46
+metadata is already stored here. So that's what I'm alluding to that this a
+1:00:51
+already has this metadata uh stored in the JSON file corresponding to it and
+1:00:56
+you can easily figure out from this that whether 150 or whatever the number is
+1:01:00
+750 where does it lie. Does that answer your question Gage?
+1:01:20
+Maybe he's typing. Okay.
+1:01:26
+>> So, I'll go through the recording again. He might have missed something.
+1:01:34
+probably you can go through the um the notebook as well like just run them.
+1:01:40
+There's a illustration there as well for the same thing.
+1:01:49
+>> Okay.
+1:01:49
+>> Okay. So um I think maybe we can um maybe call it a day over here for
+1:01:58
+this session
+1:02:00
+>> and hopefully we actually have electives like distributed databases and
+1:02:04
+distributed systems where we could have all our uh next set of queries answered
+1:02:10
+there because there we would be doing things in far more detail on distributed
+1:02:14
+systems. So, um, so I'll just stop for recording.
+Displaying 2_ Expert Lecture (Joydeep)_Big Data Handling.
